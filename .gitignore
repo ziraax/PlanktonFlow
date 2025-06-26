@@ -12,7 +12,8 @@ tsv_files/
 
 # Weights and Biases folder is not needed for the repo 
 wandb/
-model_weights/
+model_weights/resnet/
+model_weights/yolov11/
 outputs/
 YOLOv8Classification500/
 YOLOv11Classification500/
