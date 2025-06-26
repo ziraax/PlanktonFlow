@@ -1,0 +1,82 @@
+names:
+- Acroperus
+- Asplanchna
+- Baetidae
+- Botryococcus
+- Brachionus
+- Brachionus angularis
+- Brachionus calyciflorus
+- Brachionus falcatus
+- Calanoida
+- Calothrix
+- Ceratium
+- Ceratopogonidae
+- Ceriodaphnia
+- Chaoboridae
+- Chironomidae
+- Chlorophyceae X
+- Chydoridae
+- Chydorus
+- Cladocera
+- Closterium
+- Coelastrum
+- Copepoda_Maxillopoda
+- Cosmarium
+- Cyanophyceae unknown
+- Cyclopoida
+- Daphnia_Daphniidae
+- Daphniidae
+- Dinobryon
+- Euglena
+- Filinidae
+- Hexarthra
+- Insecta
+- Keratella
+- Keratella cochlearis
+- Keratella quadrata
+- Keratella testudo
+- Microcystis sp
+- Monostyla
+- Mougeotia
+- Mytilina
+- Nematoda
+- Oligochaeta
+- Ostracoda
+- Pediastrum
+- Pleurotaenium
+- Polyarthra
+- Rotifera X
+- Scapholeberis
+- Simocephalus
+- Sphaerocystis
+- Spirogyra
+- Testudinella
+- Volvox
+- aggregates
+- bubble
+- ceratium-multiple
+- damaged_Cladocera
+- dark_disc
+- detritus
+- detritus-dark
+- detritus-organic
+- duplicate
+- egg_Rotifera
+- egg_other
+- ephippium
+- fiber_detritus
+- filament_detritus
+- grey detritus
+- multiple organisms
+- multiple-filinidae
+- multiple-keratella
+- multiple-rotifera
+- nauplii_Copepoda
+- organisms+detritus
+- transparent
+- with-eggs_Brachionus
+nc: 76
+path: DATA/final_dataset
+test: test
+train: train
+val: val
