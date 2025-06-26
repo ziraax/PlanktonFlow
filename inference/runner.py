@@ -61,7 +61,7 @@ def run_inference(args, DEFAULT_CONFIG):
             
         class_names = get_classes_names()
         print("[INFO] Number of classes:", len(class_names))
-        DEFAULT_CONFIG['num_classes'] = len(class_names)
+        DEFAULT_CONFIG['num_classes'] = len(class_names) if class_names else 76
         # Get the correct variant directly from args
         if args.model_name == 'densenet':
             variant = args.densenet_variant

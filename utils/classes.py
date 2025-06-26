@@ -12,16 +12,22 @@ from utils.logs import log_class_weights
 def get_classes_names():
     """
     Returns a sorted list of class names from the training directory.
+    If the directory doesn't exist, returns an empty list.
     """
     train_path = os.path.join(DEFAULT_CONFIG['final_dataset_path'], 'train')
+    if not os.path.isdir(train_path):
+        return []
     return sorted([d for d in os.listdir(train_path) if os.path.isdir(os.path.join(train_path, d))])
+
 
 
 def get_num_classes():
     """
     Returns the number of classes in the dataset.
+    Defaults to 76 if no classes are found.
     """
-    return len(get_classes_names())
+    return len(get_classes_names()) or 76
+
 
 
 def get_class_distribution():
