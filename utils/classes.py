@@ -3,21 +3,33 @@ from config import DEFAULT_CONFIG
 from sklearn.utils import compute_class_weight
 
 import os
+import yaml
 import numpy as np
 
 from utils.logs import log_class_weights
 
-
-
 def get_classes_names():
     """
     Returns a sorted list of class names from the training directory.
-    If the directory doesn't exist, returns an empty list.
+    If the directory doesn't exist, falls back to reading dataset.yaml.
     """
     train_path = os.path.join(DEFAULT_CONFIG['final_dataset_path'], 'train')
-    if not os.path.isdir(train_path):
-        return []
-    return sorted([d for d in os.listdir(train_path) if os.path.isdir(os.path.join(train_path, d))])
+    
+    if os.path.isdir(train_path):
+        return sorted([
+            d for d in os.listdir(train_path) 
+            if os.path.isdir(os.path.join(train_path, d))
+        ])
+
+    # Fall back to reading from dataset.yaml
+    yaml_path = os.path.join(DEFAULT_CONFIG['final_dataset_path'], 'dataset.yaml')
+    if os.path.isfile(yaml_path):
+        with open(yaml_path, 'r') as f:
+            data = yaml.safe_load(f)
+            return sorted(data.get('names', []))
+    
+    # If neither source exists
+    return []
 
 
 
