@@ -6,10 +6,10 @@ metric:
 parameters:
   # Model related parameters
   model_name:
-    values: ["resnet"]
+    values: ["efficientnet"]
 
-  resnet_variant:
-    values: ["18", "34", "50", "101", "152"]  # Sweep over different ResNet variants
+  efficientnet_variant:
+    values: ['b0', 'b1', 'b2', 'b3', 'b4', 'b5']  # Sweep over different efficient variants
   # Loss related parameters
   loss_type:
     values: ["weighted", "focal", "labelsmoothing"]
