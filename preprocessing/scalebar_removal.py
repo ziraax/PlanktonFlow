@@ -69,8 +69,8 @@ def remove_scale_bars():
     processed_root.mkdir(parents=True, exist_ok=True)
 
     # Load model once
-    model = YOLO(CONFDEFAULT_CONFIGIG['scalebar_model_path'])
-    model.conf = CONFDEFAULT_CONFIGIG['scalebar_confidence']
+    model = YOLO(DEFAULT_CONFIG['scalebar_model_path'])
+    model.conf = DEFAULT_CONFIG['scalebar_confidence']
 
     image_paths = []
     for year in DEFAULT_CONFIG['years']:
