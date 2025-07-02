@@ -4,6 +4,7 @@ import torch
 import torch.nn.functional as F
 from preprocessing.scalebar_removal import process_image
 from pathlib import Path
+from tqdm import tqdm
 import tempfile
 import shutil 
 import hashlib
@@ -115,7 +116,7 @@ def run_inference(args, DEFAULT_CONFIG):
             #---------------------------------------
             # Perform batch inference
             with torch.no_grad():
-                for batch_images, batch_paths in dataloader:
+                for batch_images, batch_paths in tqdm(dataloader, desc="Inference", unit="batch"):
                     batch_images = batch_images.to(args.device)
                     logits = model(batch_images)  # (B, C)
                     probs = F.softmax(logits, dim=1)  # (B, C)
