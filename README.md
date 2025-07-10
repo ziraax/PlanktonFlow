@@ -195,16 +195,18 @@ An exemple could be :
 
 ```bash
 python -m inference.predict \
-  --image_dir DATA/ecotaxa_infer_set 
+  --image_dir DATA\ecotaxa_infer_set 
   --model_name densenet 
   --densenet_variant 121 
-  --weights_path model_weights/densenet/121/leafy-sweep-26/best.pt 
+  --weights_path model_weights\densenet\121\leafy-sweep-26\best.pt 
   --batch_size 64 
   --top_k 3 
-  --device cuda 
-  --save_csv outputs/res_cool.csv 
+  --device cpu 
+  --save_csv outputs/res_inference_infer.csv 
   --wandb_log
 ``` 
+
+Note that the `output` folder to save the csv containing results must exist before launching the inference process. 
 
 | Flag             | Description                       |
 | ---------------- | --------------------------------- |
