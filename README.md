@@ -66,7 +66,7 @@ python -m venv .venv
 Where **.venv** will be the name of the folder holding the virtual environment. 
 
 
-3. **Activate the Environment**:
+4. **Activate the Environment**:
 
 Open a terminal in the project folder. Now, depending on your Operating System : 
 
@@ -98,7 +98,7 @@ Set-ExecutionPolicy -Scope Process-ExecutionPolicy Bypass
 ```
 Then activate your virtual environment.
 
-2. **Install Dependencies**:
+5. **Install Dependencies**:
 
 Type in your terminal:
 
@@ -114,7 +114,7 @@ You can confirm it worked by typing :
 pip list
 ```
 
-3. **(Optional) Log into Weights & Biases**
+6. **(Optional) Log into Weights & Biases**
 ```bash
 wandb login
 ``` 
@@ -232,15 +232,7 @@ python -m inference.predict \
 
 ## Model Factory
 
-Supported architectures and variants:
-
-| Model        | Variants                  |
-|--------------|---------------------------|
-| YOLOv11      | Classification            |   
-| DenseNet     | 121, 169, 201, 161        |
-| EfficientNet | b0-b5                     |
-| ResNet       | 18, 34, 50, 101, 152      |   
-
+TODO
 
 ## Configuration
 
