@@ -175,22 +175,9 @@ Then modify in **config.py** the path to your own dataset. TODO
 
 ### Inference (Making predictions)
 
-To do inference using the best model from our experimentations, you can directly do: 
-
-```python
-python -m inference.predict \
-  --image_dir PATH/TO/YOUR/IMAGES \
-  --model_name best_model
-  --weights_path best_model
-  --batch_size 64
-  --top_k 3
-  --device [cpu, cuda]
-  --save_csv PATH/TO/SAVE/CSV
-  --wandb_log
-```
+To make inference, you need to have a folder containing all your images.
 
 In case you have trained your own model, you want to use the inference pipeline with specified model parameters.
-
 
 ```bash
 python -m inference.predict \
