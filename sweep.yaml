@@ -6,10 +6,10 @@ metric:
 parameters:
   # Model related parameters
   model_name:
-    values: ["efficientnet"]
+    values: ["densenet"]
 
-  efficientnet_variant:
-    values: ['b2', 'b3', 'b4', 'b5']  # Sweep over different efficient variants
+  densenet_variant:
+    values: ['169', '201', '161']  # Sweep over different efficient variants
   # Loss related parameters
   loss_type:
     values: ["weighted", "focal", "labelsmoothing"]

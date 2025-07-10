@@ -6,6 +6,10 @@
 # Data folders are too big to be uploaded to GitHub
 DATA/
 
+# Model weights
+model_weights/
+
+
 #Exports
 exports/
 tsv_files/

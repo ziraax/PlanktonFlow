@@ -72,7 +72,7 @@ def create_model(
     
 
     elif model_name == 'densenet':
-        print(f"[INFO] Using DenseNet with pretrained={pretrained} and freeze_backbone={freeze_backbone}")
+        print(f"[INFO] Using DenseNet with pretrained={pretrained} and freeze_backbone={freeze_backbone}, variant={densenet_variant}")
         return DenseNetClassifier(
             num_classes=num_classes,
             variant=densenet_variant,
@@ -82,9 +82,10 @@ def create_model(
             mc_p=mc_p
         )
     elif model_name == 'efficientnet':
+        print(f"[INFO] Using EfficientNet with variant {efficientnet_variant}, pretrained={pretrained}, freeze_backbone={freeze_backbone}, mc_dropout={mc_dropout}, mc_p={mc_p}")
         return EfficientNetClassifier(
             num_classes=num_classes, 
-            variant="b0", 
+            variant=efficientnet_variant, 
             pretrained=pretrained, 
             freeze_backbone=freeze_backbone,
             mc_dropout=mc_dropout,
