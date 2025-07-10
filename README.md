@@ -51,13 +51,15 @@ git clone https://github.com/ziraax/TaxoNet.git
 cd TaxoNet
 ```
 
+Option 2 : Using the download button
+
 If you are not familiar with Git, you can simply click the green "<> Code" button and click on "Download ZIP". Then, simply extract the project where you want it to be on your computer. 
 
 3. **Create a virtual environment**:
 
 Virtual environments in Python are isolated directories that contain their own Python interpreter and libraries, allowing you to manage dependencies for each project separately. This prevents conflicts between packages required by different projects and ensures reproducible setups. This comes handy on project like this one where there a lot of dependencies. 
 
-To create a virtual environment, write in your terminal :
+To create a virtual environment, open a terminal in the folder where you downloaded the project and run :
 
 ```bash
 python -m venv .venv
@@ -68,7 +70,7 @@ Where **.venv** will be the name of the folder holding the virtual environment.
 
 4. **Activate the Environment**:
 
-Open a terminal in the project folder. Now, depending on your Operating System : 
+Now, depending on your Operating System : 
 
  - On Windows using your Terminal (CMD), type:
 ```bash
@@ -90,8 +92,7 @@ source .venv/Scripts/activate
 After activation, your terminal will change to show the venv name. 
 
 ⚠️ In case you run into a bug like "Cannot load the file 
-C:\.\TaxoNet\venv\Scripts\Activate.ps1 because 
-script execution is disabled on this system.", it means that your current script execution policy is blocking scripts by default for security reason. To fix this issue, type in a Powershell terminal: 
+C:\.\TaxoNet\venv\Scripts\Activate.ps1 because script execution is disabled on this system.", it means that your current script execution policy is blocking scripts by default for security reason. To fix this issue, type in a Powershell terminal: 
 
 ```bash
 Set-ExecutionPolicy -Scope Process-ExecutionPolicy Bypass
