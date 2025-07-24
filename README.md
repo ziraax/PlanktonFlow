@@ -95,7 +95,7 @@ After activation, your terminal will change to show the venv name.
 C:\.\TaxoNet\venv\Scripts\Activate.ps1 because script execution is disabled on this system.", it means that your current script execution policy is blocking scripts by default for security reason. To fix this issue, type in a Powershell terminal: 
 
 ```bash
-Set-ExecutionPolicy -Scope Process-ExecutionPolicy Bypass
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 Then activate your virtual environment.
 

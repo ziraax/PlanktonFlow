@@ -12,6 +12,10 @@ model_weights/
 # Utils
 utils/flatten_test.py
 
+# Requirements
+requirements2.txt
+requirementsprev.txt
+
 #Exports
 exports/
 tsv_files/
