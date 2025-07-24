@@ -35,8 +35,6 @@ class YOLOv11Classifier:
                 device=config['device'],
                 augment=False,
                 optimizer=config['optimizer'],
-                lr0=config['initial_lr'],
-                weight_decay=config['weight_decay'],
                 patience=config['early_stopping_patience'],
                 save_period=1,
                 project=config['project_name'],

@@ -9,6 +9,8 @@ DATA/
 # Model weights
 model_weights/
 
+# Utils
+utils/flatten_test.py
 
 #Exports
 exports/

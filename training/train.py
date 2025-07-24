@@ -23,11 +23,13 @@ def _initialize_wandb(config):
 
     # Get the appropriate variant depending on the model
     if model_name == "resnet":
-        variant = config.get("resnet_variant", "unknown")
+        variant = config.get("model_variant", "unknown_resnet")
     elif model_name == "densenet":
-        variant = config.get("densenet_variant", "unknown")
+        variant = config.get("model_variant", "unknown_densenet")
     elif model_name == "efficientnet":
-        variant = config.get("efficientnet_variant", "unknown")
+        variant = config.get("model_variant", "unknown_efficientnet")
+    elif model_name == "yolov11":
+        variant = config.get("model_variant", "Default-cls")
     else:
         variant = "n/a"
 
@@ -50,29 +52,35 @@ def _setup_training_environment(config):
         print(f"[WARNING] 'num_classes' not found in config. Using class weights to determine number of classes.")
         config['num_classes'] = len(get_class_weights(config, strategy="balanced")[0])
 
-    config.setdefault("loss_type", "focal")  # or "labelsmoothing", "weighted"
-    config.setdefault("focal_gamma", 2.0)
-    config.setdefault("use_per_class_alpha", True)  # scalar fallback for focal
-    config.setdefault("early_stopping_patience", 20)
-    config.setdefault("batch_size", 64)
-    config.setdefault("optimizer", "adamw")  # or "adam", "sgd"
-    config.setdefault("learning_rate", 0.0004175)
-    config.setdefault("weight_decay", 0.125)
-    config.setdefault("epochs", 8)
-    config.setdefault("labelsmoothing_epsilon", 0.1)
+    if config['model_name'] == "yolov11":
+        config.setdefault("model_variant", "Default-cls")
+        config.setdefault("batch_size", 32)
+        config.setdefault("epochs", 30)
+        config.setdefault("optimizer", "adamw")
+        config.setdefault("early_stopping_patience", 15)
+    else:
+        config.setdefault("loss_type", "focal")  # or "labelsmoothing", "weighted"
+        config.setdefault("focal_gamma", 2.0)
+        config.setdefault("use_per_class_alpha", True)  # scalar fallback for focal
+        config.setdefault("early_stopping_patience", 20)
+        config.setdefault("batch_size", 64)
+        config.setdefault("optimizer", "adamw")  # or "adam", "sgd"
+        config.setdefault("learning_rate", 0.0004175)
+        config.setdefault("weight_decay", 0.125)
+        config.setdefault("epochs", 30)
+        config.setdefault("labelsmoothing_epsilon", 0.1)
 
 
-    print(f"[INFO] Using input size: {config['img_size']} for model: {config['model_name']}")
-    print(f"[INFO] Using num classes: {config['num_classes']} for model: {config['model_name']}")
-    print(f"[INFO] Using batch size: {config['batch_size']} for model: {config['model_name']}")
-    print(f"[INFO] Using learning rate: {config['learning_rate']} for model: {config['model_name']}")
-    print(f"[INFO] Using weight decay: {config['weight_decay']} for model: {config['model_name']}")
-    print(f"[INFO] Using epochs: {config['epochs']} for model: {config['model_name']}")
-    print(f"[INFO] Using early stopping patience: {config['early_stopping_patience']} for model: {config['model_name']}")
-    print(f"[INFO] Using loss type: {config['loss_type']}")
-    print(f"[INFO] Using focal gamma: {config['focal_gamma']})")
-    print(f"[INFO] Using focal alpha per class?: {config.get('use_per_class_alpha')}")
-
+        print(f"[INFO] Using input size: {config['img_size']} for model: {config['model_name']}")
+        print(f"[INFO] Using num classes: {config['num_classes']} for model: {config['model_name']}")
+        print(f"[INFO] Using batch size: {config['batch_size']} for model: {config['model_name']}")
+        print(f"[INFO] Using learning rate: {config['learning_rate']} for model: {config['model_name']}")
+        print(f"[INFO] Using weight decay: {config['weight_decay']} for model: {config['model_name']}")
+        print(f"[INFO] Using epochs: {config['epochs']} for model: {config['model_name']}")
+        print(f"[INFO] Using early stopping patience: {config['early_stopping_patience']} for model: {config['model_name']}")
+        print(f"[INFO] Using loss type: {config['loss_type']}")
+        print(f"[INFO] Using focal gamma: {config['focal_gamma']})")
+        print(f"[INFO] Using focal alpha per class?: {config.get('use_per_class_alpha')}")
 
 
 def _select_loss_function(weights, device, config):
@@ -137,14 +145,6 @@ def train_model(model, config):
     device = torch.device(config['device'] if torch.cuda.is_available() else "cpu")
 
     if config["model_name"] == "yolov11":
-        config['model_variant'] = "Default-cls"
-        config['batch_size'] = config.get('batch_size', 256)
-        config['epochs'] = config.get('epochs', 65)
-        config['initial_lr'] = config.get('learning_rate', 0.0004175)
-        config['optimizer'] = config.get('optimizer', 'adamw')
-        config['weight_decay'] = config.get('weight_decay', 0.125)
-        config['momentum'] = config.get('momentum', 1.632)
-
         model = create_model('yolov11')
         model_path = model.train(run, config)
         evaluate_yolo_model(model_path, config['final_dataset_path'], run_name, config)

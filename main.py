@@ -64,17 +64,17 @@ def configure_model(args, config):
     else:
         raise ValueError(f"Unknown model name: {args.model_name}")
 
-    print(f"[INFO] Using model variant: {model_variant} for model: {args.model_name}")
+    print(f"[INFO][configure_model] Using model variant: {model_variant} for model: {args.model_name}")
 
 
     config.update({
         'model_name': args.model_name,
         'model_variant': model_variant,
         'num_classes': get_num_classes(),
-        'img_size': get_input_size_for_model(config, args.model_name, model_variant=model_variant),
+        'img_size': get_input_size_for_model(args.model_name, model_variant, config),
     })
 
-
+    return config
 
 def main():
     try:
