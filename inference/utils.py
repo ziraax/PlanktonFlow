@@ -1,6 +1,7 @@
 import pandas as pd 
 import json 
 import torch
+import os 
 
 def save_results(results, output_path):
     """
@@ -11,9 +12,11 @@ def save_results(results, output_path):
         output_path (str): Path to save the output file.
     """
     flat_rows = []
-    for item in results: 
+    for item in results:
+        image_name = os.path.basename(item['image_path'])
+        
         row = {
-            'image_path': item['image_path'],
+            'image_path': image_name,
         }
 
         # Unpack label and score per prediction tuple

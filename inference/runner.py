@@ -6,7 +6,8 @@ from preprocessing.scalebar_removal import process_image
 from pathlib import Path
 from tqdm import tqdm
 import tempfile
-import shutil 
+import shutil
+import math
 import hashlib
 from ultralytics import YOLO
 from torch.utils.data import DataLoader
@@ -73,24 +74,31 @@ def run_inference(args, DEFAULT_CONFIG):
         else:
             variant = "Default-cls"
 
-        img_size = get_input_size_for_model(args.model_name, variant)
+        img_size = 224
         all_results = []
 
         if args.model_name == "yolov11":
-            # Load YOLOv11 classification model
-            model = YOLO(args.weights_path, "classify")
+            model = YOLO(args.weights_path, task="classify")
+            num_batches = math.ceil(len(image_paths) / args.batch_size)
 
-            # Perform batch inference
-            results = model(image_paths, imgsz=img_size, device=args.device)
+            for i in tqdm(range(num_batches), desc="Inference", unit="batch"):
+                batch_paths = image_paths[i * args.batch_size:(i + 1) * args.batch_size]
 
-            for path, result in zip(image_paths, results):
-                top5_indices = result.probs.top5
-                top5_confs = result.probs.top5conf
-                preds = [(class_names[i], round(top5_confs[j].item(), 4)) for j, i in enumerate(top5_indices)]
-                all_results.append({
-                    'image_path': path,
-                    'predictions': preds
-                })
+                # stream=True to avoid memory overflow
+                results = model(batch_paths, imgsz=img_size, device=args.device, stream=True)
+
+                for path, result in zip(batch_paths, results):
+                    try:
+                        probs = result.probs.data  # shape: (num_classes,)
+                        topk = min(args.top_k, len(probs))  # safe-guard
+                        topk_confs, topk_indices = probs.topk(topk)
+                        preds = [(class_names[i], round(topk_confs[j].item(), 4)) for j, i in enumerate(topk_indices)]
+                        all_results.append({
+                            'image_path': processed_to_original.get(str(path), str(path)),
+                            'predictions': preds
+                        })
+                    except Exception as e:
+                        print(f"[ERROR] Failed inference on {path}: {e}")
 
         else:
             # Torchvision models
