@@ -14,11 +14,8 @@ class DenseNetClassifier(nn.Module):
         variant: str = "121",
         pretrained: bool = True,
         freeze_backbone: bool = False,
-        mc_dropout: bool = False,
-        mc_p: float = 0.3,
     ):
         super().__init__()
-        self.mc_dropout = mc_dropout
 
         # ----- Choose variant ----------------------------------------------
         weight_map = {
@@ -35,12 +32,7 @@ class DenseNetClassifier(nn.Module):
 
         # Replace classifier
         in_f = self.net.classifier.in_features
-        if mc_dropout:
-            self.net.classifier = nn.Sequential(
-                nn.Dropout(mc_p), nn.Linear(in_f, num_classes)
-            )
-        else:
-            self.net.classifier = nn.Linear(in_f, num_classes)
+        self.net.classifier = nn.Linear(in_f, num_classes)
 
         # Freeze backbone if asked
         if freeze_backbone:
@@ -51,17 +43,10 @@ class DenseNetClassifier(nn.Module):
 
     def forward(self, x): return self.net(x)
 
-    def _enable_mc_dropout(self):
-        for m in self.modules():
-            if isinstance(m, nn.Dropout): m.train()
 
     def predict(self, x):
-        self.eval();  self._enable_mc_dropout() if self.mc_dropout else None
-        with torch.no_grad(): return self.forward(x)
-
-    def predict_mc(self, x, T=20):
-        self.eval();  self._enable_mc_dropout()
+        self.eval()
         with torch.no_grad():
-            outs = [self.forward(x).softmax(1) for _ in range(T)]
-        outs = torch.stack(outs)
-        return outs.mean(0), outs.std(0)
+            return self.forward(x)
+
+

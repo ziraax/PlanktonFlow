@@ -75,7 +75,6 @@ def evaluate_metrics_only(model, split, criterion):
     device = next(model.parameters()).device
 
     y_true, y_pred, y_pred_logits = [], [], []
-    mc_mean_all, mc_std_all = [], []
     val_loss = 0.0
 
     with torch.no_grad():
@@ -94,12 +93,6 @@ def evaluate_metrics_only(model, split, criterion):
                 val_loss += batch_loss
                 pbar.set_postfix(loss=batch_loss)
 
-            #MC Dropout
-            if getattr(model, 'mc_dropout', False):
-                mean_probs, std_probs = model.predict_mc(inputs, T=20)
-                mc_mean_all.append(mean_probs.cpu())
-                mc_std_all.append(std_probs.cpu())
-
 
     if criterion:
         val_loss /= len(split)
@@ -112,11 +105,9 @@ def evaluate_metrics_only(model, split, criterion):
     top5_correct = top5_preds.eq(y_true_tensor.view(-1, 1)).sum().item()
     top5 = top5_correct / len(y_true)
 
-    # Stack MC-Dropout tensors if available
-    mc_mean = torch.cat(mc_mean_all) if mc_mean_all else None
-    mc_std = torch.cat(mc_std_all) if mc_std_all else None
 
-    return val_loss, top1, top5, y_true, y_pred, y_pred_logits, mc_mean, mc_std
+
+    return val_loss, top1, top5, y_true, y_pred, y_pred_logits
 
 # ---- LOGGING FUNCTIONS ---- #
 
@@ -132,7 +123,7 @@ def log_core_metrics(y_true, y_pred, class_names, prefix="test"):
 
     })
 
-def log_evaluation_details(y_true, y_pred, class_names, mc_mean=None, mc_std=None):
+def log_evaluation_details(y_true, y_pred, class_names):
     report_dict = classification_report(y_true, y_pred, target_names=class_names, output_dict=True, zero_division=0)
     report_df = pd.DataFrame(report_dict).transpose().reset_index()
     report_df.rename(columns={"index": "class"}, inplace=True)
@@ -187,33 +178,13 @@ def log_evaluation_details(y_true, y_pred, class_names, mc_mean=None, mc_std=Non
     wandb.log({"normalized_confusion_matrix": wandb.Image(plt)})
     plt.close()
 
-    # MC-Dropout uncertainty
-    if mc_mean is not None and mc_std is not None:
-        # Get the max std across classes (C) for each sample
-        max_std = mc_std.max(dim=1).values  # shape [B]
-
-        df_u = pd.DataFrame({
-            "class_pred": [class_names[i] for i in y_pred],
-            "uncertainty": max_std.numpy(),
-        })
-        
-        per_class_u = df_u.groupby("class_pred").mean().reset_index()
-        wandb.log({
-            "avg_epistemic_uncertainty": wandb.Table(dataframe=per_class_u),
-        })
-
-        plt.figure(figsize=(12, max(6, len(per_class_u) * 0.3)))
-        sns.histplot(max_std.numpy(), bins=50, kde=True)
-        plt.title("Distribution of Epistemic Uncertainty")
-        wandb.log({"epistemic_uncertainty_distribution": wandb.Image(plt)})
-        plt.close()
 
 
 def run_test_full_evaluation(model, test_loader, data_dir, criterion=None):
-    test_loss, top1, top5, y_true, y_pred, y_pred_logits, mc_mean, mc_std = evaluate_metrics_only(model, test_loader, criterion=None)
+    test_loss, top1, top5, y_true, y_pred, y_pred_logits = evaluate_metrics_only(model, test_loader, criterion=None)
 
     with open(Path(data_dir) / "dataset.yaml") as f:
         class_names = yaml.safe_load(f)['names']
 
     log_core_metrics(y_true, y_pred, class_names, prefix="test")
-    log_evaluation_details(y_true, y_pred, class_names, mc_mean=mc_mean, mc_std=mc_std)
+    log_evaluation_details(y_true, y_pred, class_names)

@@ -111,9 +111,7 @@ def run_inference(args, DEFAULT_CONFIG):
                 pretrained=False,
                 efficientnet_variant=args.efficientnet_variant,
                 densenet_variant=args.densenet_variant,
-                resnet_variant=args.resnet_variant,
-                mc_dropout=False,
-                mc_p=False        
+                resnet_variant=args.resnet_variant     
             )
 
 

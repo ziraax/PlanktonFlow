@@ -4,9 +4,6 @@ import wandb
 
 from config import DEFAULT_CONFIG 
 
-from inference.runner import run_inference
-from inference.utils import save_results
-from inference.visualize import visualize_predictions
 from training.train import train_model
 from models.factory import create_model
 
@@ -45,9 +42,6 @@ def parse_args():
     parser.add_argument("--resnet_variant", type=str, default='50',
         choices=['18', '34', '50', '101', '152'], help="Variant of ResNet to use (default: 50)"
     )
-
-    parser.add_argument("--mc_dropout",   action="store_true", help="activate MC-Dropout during inference")
-    parser.add_argument("--mc_p", type=float, default=0.3, help="dropout probability when mc_dropout is on")
 
     return parser.parse_args()
 
@@ -93,9 +87,7 @@ def main():
                 freeze_backbone=args.freeze_backbone,
                 efficientnet_variant=config['model_variant'],
                 resnet_variant=config['model_variant'],
-                densenet_variant=config['model_variant'],
-                mc_dropout=args.mc_dropout,
-                mc_p=args.mc_p
+                densenet_variant=config['model_variant']
         )
             
         # Run preprocessing

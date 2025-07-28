@@ -14,11 +14,8 @@ class ResNetClassifier(nn.Module):
         variant: str = "50",
         pretrained: bool = True,
         freeze_backbone: bool = False,
-        mc_dropout: bool = False,
-        mc_p: float = 0.5,
     ):
         super().__init__()
-        self.mc_dropout = mc_dropout
 
         model_map = {
             "18": (resnet18, ResNet18_Weights),
@@ -35,13 +32,7 @@ class ResNetClassifier(nn.Module):
         self.net = fn(weights=weights)
 
         in_f = self.net.fc.in_features
-        if mc_dropout:
-            self.net.fc = nn.Sequential(
-                nn.Dropout(mc_p),
-                nn.Linear(in_f, num_classes)
-            )
-        else:
-            self.net.fc = nn.Linear(in_f, num_classes)
+        self.net.fc = nn.Linear(in_f, num_classes)
 
         if freeze_backbone:
             for p in self.net.parameters():
@@ -52,22 +43,7 @@ class ResNetClassifier(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-    def _enable_mc_dropout(self):
-        for m in self.modules():
-            if isinstance(m, nn.Dropout):
-                m.train()
-
     def predict(self, x):
         self.eval()
-        if self.mc_dropout:
-            self._enable_mc_dropout()
         with torch.no_grad():
             return self.forward(x)
-
-    def predict_mc(self, x, T=20):
-        self.eval()
-        self._enable_mc_dropout()
-        with torch.no_grad():
-            preds = [self.forward(x).softmax(dim=1) for _ in range(T)]
-        preds = torch.stack(preds)
-        return preds.mean(dim=0), preds.std(dim=0)

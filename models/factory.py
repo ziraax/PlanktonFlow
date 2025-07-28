@@ -10,9 +10,7 @@ def create_model(
         freeze_backbone=False, 
         efficientnet_variant="b0", 
         densenet_variant="121",
-        resnet_variant="50",
-        mc_dropout=False,
-        mc_p=0.3
+        resnet_variant="50"
         ):
     """
     Factory function to create a model instance based on the model name.
@@ -27,16 +25,11 @@ def create_model(
         freeze_backbone : bool
             Freeze feature extractor layers.
         efficientnet_variant : str
-            b0 … b7 (only if model_name == 'efficientnet').
+            b0 … b5 (only if model_name == 'efficientnet').
         densenet_variant : str
             '121','169','201','161' (only if model_name == 'densenet').
         resnet_variant : str
             '18','34','50','101','152' (only if model_name == 'resnet').
-        mc_dropout : bool
-            If True, build the classifier with MC-dropout layers and expose
-            .predict_mc().
-        mc_p : float
-            Dropout probability to use when mc_dropout is True.
     Returns:
         nn.Module: An instance of the specified mode OR a YOLOv11Classifier with own training logic.
     """
@@ -65,9 +58,7 @@ def create_model(
             num_classes=num_classes,
             variant=resnet_variant,
             pretrained=pretrained, 
-            freeze_backbone=freeze_backbone,
-            mc_dropout=mc_dropout,
-            mc_p=mc_p
+            freeze_backbone=freeze_backbone
         )
     
 
@@ -77,19 +68,15 @@ def create_model(
             num_classes=num_classes,
             variant=densenet_variant,
             pretrained=pretrained, 
-            freeze_backbone=freeze_backbone,
-            mc_dropout=mc_dropout,
-            mc_p=mc_p
+            freeze_backbone=freeze_backbone
         )
     elif model_name == 'efficientnet':
-        print(f"[INFO] Using EfficientNet with variant {efficientnet_variant}, pretrained={pretrained}, freeze_backbone={freeze_backbone}, mc_dropout={mc_dropout}, mc_p={mc_p}")
+        print(f"[INFO] Using EfficientNet with variant {efficientnet_variant}, pretrained={pretrained}, freeze_backbone={freeze_backbone}")
         return EfficientNetClassifier(
             num_classes=num_classes, 
             variant=efficientnet_variant, 
             pretrained=pretrained, 
-            freeze_backbone=freeze_backbone,
-            mc_dropout=mc_dropout,
-            mc_p=mc_p
+            freeze_backbone=freeze_backbone
         )
     else:
         raise ValueError(f"Model {model_name} is not supported.")

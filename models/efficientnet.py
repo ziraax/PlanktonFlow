@@ -15,11 +15,8 @@ class EfficientNetClassifier(nn.Module):
         variant: str = "b0",
         pretrained: bool = True,
         freeze_backbone: bool = False,
-        mc_dropout: bool = False,
-        mc_p: float = 0.2,
     ):
         super().__init__()
-        self.mc_dropout = mc_dropout
 
         model_map = {
             "b0": (efficientnet_b0, EfficientNet_B0_Weights),
@@ -40,12 +37,7 @@ class EfficientNetClassifier(nn.Module):
 
         # Swap classifier
         in_f = self.net.classifier[1].in_features
-        if mc_dropout:
-            self.net.classifier[1] = nn.Sequential(
-                nn.Dropout(mc_p), nn.Linear(in_f, num_classes)
-            )
-        else:
-            self.net.classifier[1] = nn.Linear(in_f, num_classes)
+        self.net.classifier[1] = nn.Linear(in_f, num_classes)
 
         if freeze_backbone:
             for p in self.net.features.parameters():
@@ -55,17 +47,7 @@ class EfficientNetClassifier(nn.Module):
 
     def forward(self, x): return self.net(x)
 
-    def _enable_mc_dropout(self):
-        for m in self.modules():
-            if isinstance(m, nn.Dropout): m.train()
-
     def predict(self, x):
-        self.eval();  self._enable_mc_dropout() if self.mc_dropout else None
-        with torch.no_grad(): return self.forward(x)
-
-    def predict_mc(self, x, T=20):
-        self.eval();  self._enable_mc_dropout()
+        self.eval()
         with torch.no_grad():
-            outs = [self.forward(x).softmax(1) for _ in range(T)]
-        outs = torch.stack(outs)
-        return outs.mean(0), outs.std(0)
+            return self.forward(x)
