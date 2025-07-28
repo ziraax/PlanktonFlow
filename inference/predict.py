@@ -4,7 +4,6 @@ import argparse
 import wandb
 import torch
 from inference.runner import run_inference
-from inference.visualize import visualize_predictions
 from config import DEFAULT_CONFIG
 from PIL import Image
 from datetime import datetime 
@@ -28,9 +27,6 @@ def parse_args():
 def main():
     args = parse_args()
     results = run_inference(args, DEFAULT_CONFIG)
-
-    visualize_predictions(results)
-
     if args.wandb_log:
         wandb.init(
             project=DEFAULT_CONFIG.get('project_name', 'classification'),

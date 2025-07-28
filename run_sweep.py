@@ -10,11 +10,6 @@ from models.factory import create_model
 from training.train import train_model
 from utils.classes import get_num_classes
 
-def set_seed(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
 
 def sweep_train():
     #initialize wandb
