@@ -1,0 +1,14 @@
+# YOLO Configuration
+model:
+  name: "yolov11"
+  variant: "Default-cls"
+
+training:
+  batch_size: 32
+  epochs: 30
+  optimizer: "adamw"
+  early_stopping_patience: 15
+
+wandb:
+  tags: ["yolov11", "classification", "baseline"]
+  notes: "YOLOv11 classification baseline"

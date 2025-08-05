@@ -1,0 +1,22 @@
+# Best EfficientNet B5 Inference Configuration
+# This uses the best model following our extensive experiments
+model:
+  name: "efficientnet"
+  variant: "b5"
+  weights_path: "model_weights/efficientnet/b5/divine-sweep-10/best.pt"
+
+inference:
+  batch_size: 32 # Adjust this if you encounter CUDA OOM errors
+  top_k: 5 # Number of top predictions to return 
+  device: "cuda" # Use "cuda" for GPU or "cpu" for CPU
+  save_csv: true # Save results to a CSV file
+  output_path: "outputs/efficientnet_b5_inference.csv" # Path to save the inference results
+
+# Optional preprocessing during inference
+preprocessing:
+  scalebar_removal: true # Remove scalebars from images if necessary
+  
+wandb:
+  log_results: true # Log results to Weights & Biases if needed
+  tags: ["inference", "efficientnet", "b5", "production"]
+  notes: "Production inference with best EfficientNet B5 model"

@@ -16,6 +16,7 @@ from utils.classes import get_class_weights
 from config import DEFAULT_CONFIG
 from utils.input_size import get_input_size_for_model
 from training.early_stopping import EarlyStopping
+from utils.config_manager import config_manager
 
 def _initialize_wandb(config):
 
@@ -44,6 +45,10 @@ def _initialize_wandb(config):
     )
 
 def _setup_training_environment(config):
+    """
+    Setup training environment with config-driven approach and fallback defaults.
+    Loads from config file if specified, otherwise uses the existing fallback system.
+    """
     if 'img_size' not in config:
         print(f"[WARNING] 'img_size' not found in config. Using default input size for model: {config['model_name']}")
         config['img_size'] = get_input_size_for_model(config, config['model_name'], config.get('model_variant', 'Default-cls'))
@@ -52,24 +57,28 @@ def _setup_training_environment(config):
         print(f"[WARNING] 'num_classes' not found in config. Using class weights to determine number of classes.")
         config['num_classes'] = len(get_class_weights(config, strategy="balanced")[0])
 
+    # Model-specific defaults (keeping existing fallback logic)
     if config['model_name'] == "yolov11":
-        config.setdefault("model_variant", "Default-cls")
-        config.setdefault("batch_size", 32)
-        config.setdefault("epochs", 30)
-        config.setdefault("optimizer", "adamw")
-        config.setdefault("early_stopping_patience", 15)
+        _apply_defaults(config, {
+            "model_variant": "Default-cls",
+            "batch_size": 32,
+            "epochs": 30,
+            "optimizer": "adamw",
+            "early_stopping_patience": 15
+        })
     else:
-        config.setdefault("loss_type", "focal")  # or "labelsmoothing", "weighted"
-        config.setdefault("focal_gamma", 2.0)
-        config.setdefault("use_per_class_alpha", True)  # scalar fallback for focal
-        config.setdefault("early_stopping_patience", 20)
-        config.setdefault("batch_size", 64)
-        config.setdefault("optimizer", "adamw")  # or "adam", "sgd"
-        config.setdefault("learning_rate", 0.0004175)
-        config.setdefault("weight_decay", 0.125)
-        config.setdefault("epochs", 30)
-        config.setdefault("labelsmoothing_epsilon", 0.1)
-
+        _apply_defaults(config, {
+            "loss_type": "focal",
+            "focal_gamma": 2.0,
+            "use_per_class_alpha": True,
+            "early_stopping_patience": 20,
+            "batch_size": 64,
+            "optimizer": "adamw",
+            "learning_rate": 0.0004175,
+            "weight_decay": 0.125,
+            "epochs": 30,
+            "labelsmoothing_epsilon": 0.1
+        })
 
         print(f"[INFO] Using input size: {config['img_size']} for model: {config['model_name']}")
         print(f"[INFO] Using num classes: {config['num_classes']} for model: {config['model_name']}")
@@ -79,8 +88,29 @@ def _setup_training_environment(config):
         print(f"[INFO] Using epochs: {config['epochs']} for model: {config['model_name']}")
         print(f"[INFO] Using early stopping patience: {config['early_stopping_patience']} for model: {config['model_name']}")
         print(f"[INFO] Using loss type: {config['loss_type']}")
-        print(f"[INFO] Using focal gamma: {config['focal_gamma']})")
-        print(f"[INFO] Using focal alpha per class?: {config.get('use_per_class_alpha')}")
+        
+        # Show loss-specific parameters based on loss type
+        if config['loss_type'] == 'focal':
+            print(f"[INFO] Using focal gamma: {config['focal_gamma']}")
+            print(f"[INFO] Using focal alpha per class?: {config.get('use_per_class_alpha')}")
+        elif config['loss_type'] == 'labelsmoothing':
+            print(f"[INFO] Using label smoothing epsilon: {config['labelsmoothing_epsilon']}")
+        elif config['loss_type'] == 'weighted':
+            print(f"[INFO] Using weighted loss with class weights")
+
+
+def _apply_defaults(config, defaults):
+    """Apply default values only if not already present in config and no config file was loaded"""
+    # Don't apply defaults if config was loaded from file (except for missing keys)
+    if config.get('_config_loaded', False):
+        # Only set defaults for keys that are completely missing
+        for key, value in defaults.items():
+            if key not in config:
+                config[key] = value
+    else:
+        # Normal fallback behavior when no config file is used
+        for key, value in defaults.items():
+            config.setdefault(key, value)
 
 
 def _select_loss_function(weights, device, config):
@@ -136,7 +166,52 @@ def _train_one_epoch(model, train_loader, criterion, optimizer, device, epoc, to
 
     return running_loss / len(train_loader)
 
-def train_model(model, config):
+def train_model(model, config, training_config_name=None):
+    """
+    Train a model with optional config file support
+    
+    Args:
+        model: The model to train
+        config: Base configuration (from main.py)
+        training_config_name: Optional name of training config file to load
+    """
+    # Load training config if specified
+    if training_config_name:
+        print(f"[INFO] Loading training configuration: {training_config_name}")
+        training_config = config_manager.get_training_config(training_config_name)
+        
+        # Override model parameters from config file
+        if 'model' in training_config:
+            model_cfg = training_config['model']
+            config.update({
+                'model_name': model_cfg.get('name', config.get('model_name')),
+                'model_variant': model_cfg.get('variant', config.get('model_variant')),
+                'pretrained': model_cfg.get('pretrained', True),
+                'freeze_backbone': model_cfg.get('freeze_backbone', False)
+            })
+        
+        # Override training parameters
+        if 'training' in training_config:
+            config.update(training_config['training'])
+            
+        # Override loss parameters  
+        if 'loss' in training_config:
+            loss_config = training_config['loss'].copy()
+            
+            # Map 'type' to 'loss_type' for backward compatibility
+            if 'type' in loss_config:
+                loss_config['loss_type'] = loss_config.pop('type')
+                
+            config.update(loss_config)
+            
+        print(f"[INFO] Training config loaded: {training_config_name}")
+        
+        # Set flag to indicate config was loaded to prevent defaults override
+        config['_config_loaded'] = True
+    else:
+        print(f"[INFO] Using fallback defaults for training configuration")
+        config['_config_loaded'] = False
+
     _setup_training_environment(config)
 
     run= _initialize_wandb(config)

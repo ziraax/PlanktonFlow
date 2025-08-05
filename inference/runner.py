@@ -2,6 +2,10 @@ import sys
 import os    
 import torch
 import torch.nn.functional as F
+
+# Add the parent directory to the path so we can import modules
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from preprocessing.scalebar_removal import process_image
 from pathlib import Path
 from tqdm import tqdm

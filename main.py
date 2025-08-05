@@ -3,6 +3,7 @@ import copy
 import wandb
 
 from config import DEFAULT_CONFIG 
+from utils.config_manager import config_manager
 
 from training.train import train_model
 from models.factory import create_model
@@ -13,6 +14,14 @@ from utils.input_size import get_input_size_for_model
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train a custom model.")
+    
+    #------------ Configuration Arguments ------------
+    parser.add_argument('--config', type=str, default=None, 
+        help='Path to training configuration YAML file (e.g., configs/training/efficientnet_b5_production.yaml)'
+    )
+    parser.add_argument('--training-config', type=str, default=None,
+        help='Name of training configuration (e.g., efficientnet_b5_production)'
+    )
     
     #------------ Training Arguments ------------
     parser.add_argument('--model_name', type=str, default='densenet',
@@ -74,25 +83,67 @@ def main():
     try:
         args = parse_args()
 
-        config = copy.deepcopy(DEFAULT_CONFIG)
-        config = configure_model(args, config)
+        # Handle config loading
+        if args.config:
+            # Load from full config file path
+            config = config_manager.load_config(args.config)
+            print(f"[INFO] Loaded configuration from: {args.config}")
+        elif args.training_config:
+            # Load from training config name
+            config = config_manager.get_training_config(args.training_config)
+            print(f"[INFO] Loaded training configuration: {args.training_config}")
+        else:
+            # Use default config with command line overrides
+            config = copy.deepcopy(DEFAULT_CONFIG)
+            config = configure_model(args, config)
 
-        print(f"[INFO] Creating model: {config['model_name']} | Variant: {config['model_variant']} | "
-              f"Pretrained: {args.pretrained} | Freeze Backbone: {args.freeze_backbone}")      
+        # Extract model configuration from loaded config or use CLI args
+        if args.config or args.training_config:
+            # When using config files, extract model parameters
+            if 'model' in config:
+                model_config = config['model']
+                model_name = model_config.get('name', 'densenet')
+                model_variant = model_config.get('variant', 'Default')
+                pretrained = model_config.get('pretrained', True)
+                freeze_backbone = model_config.get('freeze_backbone', False)
+            else:
+                # Fallback if model section missing in config
+                model_name = config.get('model_name', 'densenet')
+                model_variant = config.get('model_variant', 'Default')
+                pretrained = True
+                freeze_backbone = False
+            
+            # Update config with extracted model info
+            config.update({
+                'model_name': model_name,
+                'model_variant': model_variant,
+                'num_classes': get_num_classes(),
+                'img_size': get_input_size_for_model(model_name, model_variant, config),
+            })
+        else:
+            # Use CLI arguments (existing logic)
+            config = configure_model(args, config)
+            model_name = config['model_name']
+            model_variant = config['model_variant']
+            pretrained = args.pretrained
+            freeze_backbone = args.freeze_backbone
+
+        print(f"[INFO] Creating model: {model_name} | Variant: {model_variant} | "
+              f"Pretrained: {pretrained} | Freeze Backbone: {freeze_backbone}")      
           
         model = create_model(
-                args.model_name, 
-                num_classes=config['num_classes'], 
-                pretrained=args.pretrained,
-                freeze_backbone=args.freeze_backbone,
-                efficientnet_variant=config['model_variant'],
-                resnet_variant=config['model_variant'],
-                densenet_variant=config['model_variant']
+                model_name, 
+                num_classes=config.get('num_classes', get_num_classes()), 
+                pretrained=pretrained,
+                freeze_backbone=freeze_backbone,
+                efficientnet_variant=model_variant if model_name == 'efficientnet' else args.efficientnet_variant,
+                resnet_variant=model_variant if model_name == 'resnet' else args.resnet_variant,
+                densenet_variant=model_variant if model_name == 'densenet' else args.densenet_variant
         )
             
-        # Run preprocessing
-        # full_preprocessing()
-        train_model(model, config)
+        # Run training with optional config name
+        training_config_name = args.training_config if args.training_config else None
+        train_model(model, config, training_config_name)
 
         
     except Exception as e:

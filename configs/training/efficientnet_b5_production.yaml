@@ -1,0 +1,30 @@
+# EfficientNet B5 best model configuration
+# It's derived from the experiments we performed following the study
+# Thus, training with this config should allow you to reproduce the results
+model:
+  name: "efficientnet"
+  variant: "b5"
+  pretrained: true
+  freeze_backbone: false
+
+training:
+  batch_size: 32    # In case you run into a CUDA OOM error, reduce this (to 32, 16, 8, 4, 2, 1)
+  epochs: 50        # In case you want to train for longer or shorter, adjust this value  
+
+  # You shouldn't need to change these values unless you have specific reasons
+  learning_rate: 0.001               
+  weight_decay: 0.01
+  optimizer: "adamw"
+  early_stopping_patience: 15
+
+# Loss function configuration
+# You shouldn't need to change this unless you have specific reasons
+loss:
+  type: "focal"
+  focal_gamma: 2.0
+  use_per_class_alpha: true
+
+# Additional hyperparameters specific to this config
+wandb:
+  tags: ["production", "efficientnet", "b5", "focal_loss"]
+  notes: "Production EfficientNet B5 with Focal Loss for class imbalance"

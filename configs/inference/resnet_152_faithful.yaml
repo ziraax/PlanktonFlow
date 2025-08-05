@@ -1,0 +1,20 @@
+# ResNet 152 Faithful Sweep Inference Configuration
+model:
+  name: "resnet"
+  variant: "152"
+  weights_path: "model_weights/resnet/152/faithful-sweep-14/best.pt"
+
+inference:
+  batch_size: 32  # Smaller batch size for ResNet 152 (larger model)
+  top_k: 3
+  device: "cuda"
+  save_csv: true
+  output_path: "outputs/resnet_152_faithful_inference.csv"
+
+preprocessing:
+  scalebar_removal: true
+
+wandb:
+  log_results: false
+  tags: ["inference", "resnet", "152", "faithful-sweep-14"]
+  notes: "Inference with ResNet 152 from faithful-sweep-14 experiment"

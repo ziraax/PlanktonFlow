@@ -1,17 +1,23 @@
+#!/usr/bin/env python3
+"""
+Inference script that can be run from the root directory.
+This is a wrapper around the inference module to handle import paths correctly.
+"""
+
 import sys
 import os
 import argparse
 import wandb
 import torch
+from PIL import Image
+from datetime import datetime
 
-# Add the parent directory to the path so we can import modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Ensure we can import from the current directory
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from inference.runner import run_inference
 from config import DEFAULT_CONFIG
 from utils.config_manager import config_manager
-from PIL import Image
-from datetime import datetime 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run inference on images using trained models.")
