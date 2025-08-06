@@ -22,12 +22,12 @@ from utils.classes import get_classes_names
 from utils.input_size import get_input_size_for_model
 
 
-def run_inference(args, DEFAULT_CONFIG):
+def run_inference(args, config):
     """
     Run inference on a set of images using a specified model.
     Args:
         args: Command line arguments containing model and data parameters.
-        CONFIG: Configuration dictionary containing model settings.
+        config: Configuration dictionary containing model settings.
     Returns:
         all_results: List of dictionaries containing image paths and predictions.
 
@@ -45,8 +45,8 @@ def run_inference(args, DEFAULT_CONFIG):
 
         print(f"[INFO] Temp folder is located at: {temp_processed_dir}")
 
-        scalebar_model = YOLO(DEFAULT_CONFIG['scalebar_model_path'])
-        scalebar_model.conf = DEFAULT_CONFIG['scalebar_confidence']
+        scalebar_model = YOLO(config['scalebar_model_path'])
+        scalebar_model.conf = config['scalebar_confidence']
 
         processed_to_original = {}
         processed_image_paths = []
@@ -65,9 +65,12 @@ def run_inference(args, DEFAULT_CONFIG):
         
         image_paths = processed_image_paths
             
-        class_names = get_classes_names()
-        print("[INFO] Number of classes:", len(class_names))
-        DEFAULT_CONFIG['num_classes'] = len(class_names) if class_names else 76
+        class_names = get_classes_names()        
+        # Check if model config specifies num_classes, otherwise use detected classes
+        model_config = config.get('model', {})
+        num_classes = model_config.get('num_classes', len(class_names) if class_names else 76)
+        print(f"[INFO] Using {num_classes} classes for model")
+        
         # Get the correct variant directly from args
         if args.model_name == 'densenet':
             variant = args.densenet_variant
@@ -111,7 +114,7 @@ def run_inference(args, DEFAULT_CONFIG):
 
             model = create_model(
                 args.model_name,
-                num_classes=DEFAULT_CONFIG['num_classes'],
+                num_classes=num_classes,
                 pretrained=False,
                 efficientnet_variant=args.efficientnet_variant,
                 densenet_variant=args.densenet_variant,

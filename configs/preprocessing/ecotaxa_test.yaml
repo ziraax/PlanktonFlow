@@ -1,0 +1,54 @@
+# Test EcoTaxa TSV Preprocessing Configuration
+# For testing EcoTaxa format with sample dataset
+
+input_source:
+  type: "ecotaxa"
+  data_path: "DATA/sample_ecotaxa"
+  metadata_file: "ecotaxa_export_final.tsv"
+  separator: "\t"
+
+preprocessing:
+  scalebar_removal:
+    enabled: true  # Enable sfor testing since images are already processed
+    model_path: "models/model_weights/scale_bar_remover/best.pt"
+    confidence: 0.4
+    img_size: 416
+  
+  grayscale_conversion:
+    enabled: false  # Disable since images are already processed
+    mode: "RGB"
+  
+  image_filtering:
+    min_images_per_class: 5  # Minimum 5 samples per class for stratified splitting
+    max_images_per_class: null
+    skip_corrupted_images: true
+  
+  data_splitting:
+    train_ratio: 0.7
+    val_ratio: 0.2
+    test_ratio: 0.1
+    stratified: false  # Temporarily disable stratified splitting for EcoTaxa test
+    random_seed: 42
+  
+  augmentation:
+    enabled: false  # Disable for quick testing
+    target_images_per_class: 100
+    max_copies_per_image: 3
+    techniques:
+      horizontal_flip: 0.5
+      vertical_flip: 0.2
+      rotate_90: 0.3
+      brightness_contrast: 0.4
+      hue_saturation: 0.3
+      
+output:
+  base_path: "DATA/test_ecotaxa_output"
+  processed_path: "DATA/test_ecotaxa_output/processed"
+  final_dataset_path: "DATA/test_ecotaxa_output/final_dataset"
+  create_dataset_yaml: true
+  
+logging:
+  wandb_enabled: false  # Disable W&B for testing
+  log_class_distribution: true
+  log_sample_images: false
+  log_processing_times: true

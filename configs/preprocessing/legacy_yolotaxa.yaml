@@ -1,0 +1,53 @@
+# Legacy YOLOTaxa Preprocessing Configuration
+# For existing YOLOTaxa hierarchical structure with years/types subdirectories
+
+input_source:
+  type: "hierarchical"
+  data_path: "DATA/DATA_500_INDIV"
+  subdirs: ["2022/Macro", "2022/Micro", "2023/Macro", "2023/Micro"]
+
+preprocessing:
+  scalebar_removal:
+    enabled: true
+    model_path: "models/model_weights/scale_bar_remover/best.pt"
+    confidence: 0.4
+    img_size: 416
+  
+  grayscale_conversion:
+    enabled: true
+    mode: "RGB"  # Grayscale converted back to RGB format
+  
+  image_filtering:
+    min_images_per_class: 10
+    max_images_per_class: null
+    skip_corrupted_images: true
+  
+  data_splitting:
+    train_ratio: 0.7
+    val_ratio: 0.2
+    test_ratio: 0.1
+    stratified: true
+    random_seed: 42
+  
+  augmentation:
+    enabled: true
+    target_images_per_class: 1000
+    max_copies_per_image: 10
+    techniques:
+      horizontal_flip: 0.5
+      vertical_flip: 0.2
+      rotate_90: 0.3
+      brightness_contrast: 0.4
+      hue_saturation: 0.3
+      
+output:
+  base_path: "DATA/processed_legacy"
+  processed_path: "DATA/processed_legacy/processed"
+  final_dataset_path: "DATA/processed_legacy/final_dataset"
+  create_dataset_yaml: true
+  
+logging:
+  wandb_enabled: true
+  log_class_distribution: true
+  log_sample_images: true
+  log_processing_times: true

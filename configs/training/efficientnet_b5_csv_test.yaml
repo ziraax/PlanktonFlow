@@ -1,0 +1,43 @@
+# ============================================================
+# EfficientNet B5 Training Configuration for CSV Dataset
+# ============================================================
+
+# DATA CONFIGURATION
+data:
+  dataset_path: "DATA/sample_csv_test_final_dataset"  # Path to CSV preprocessed dataset
+  
+# PROJECT CONFIGURATION
+project:
+  name: "YOLOv11Classification500"     # W&B project name
+  
+# MODEL CONFIGURATION
+model:
+  name: "efficientnet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
+  variant: "b5"             # EfficientNet variants: "b0"-"b7"
+  pretrained: true          # Use pretrained weights
+  freeze_backbone: false    # Freeze backbone layers
+  input_size: 224           # Input image size
+  num_classes: 5            # Number of output classes (from CSV dataset)
+  
+# TRAINING CONFIGURATION
+training:
+  batch_size: 32               # Training batch size
+  learning_rate: 0.001         # Initial learning rate
+  weight_decay: 0.01           # Weight decay (L2 regularization)
+  epochs: 5                    # Maximum number of epochs (quick test)
+  optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
+  early_stopping_patience: 15  # Early stopping patience
+  device: "cuda"               # Options: "cuda", "cpu", "auto"
+  num_workers: 8               # Number of data loader workers
+
+# LOSS CONFIGURATION
+loss:
+  type: "focal"                # Options: "focal", "labelsmoothing", "weighted"
+  focal_alpha: 1.0             # Focal loss alpha parameter
+  focal_gamma: 2.0             # Focal loss gamma parameter
+  use_per_class_alpha: true    # Use per-class weights
+
+# WEIGHTS & BIASES CONFIGURATION
+wandb:
+  tags: ["csv_test", "efficientnet", "b5", "focal_loss"]
+  notes: "EfficientNet B5 training on CSV preprocessed dataset"

@@ -1,0 +1,57 @@
+# Test CSV Mapping Dataset Preprocessing Configuration
+# For testing with sample classes from final_dataset in CSV format
+
+input_source:
+  type: "csv_mapping"
+  images_path: "DATA/sample_csv_test/images"
+  metadata_file: "DATA/sample_csv_test/image_labels.csv"
+  image_column: "filename"
+  label_column: "species"
+  separator: ","
+  image_path_prefix: ""
+
+preprocessing:
+  scalebar_removal:
+    enabled: true  # Enable to test scalebar removal with CSV mapping
+    model_path: "models/model_weights/scale_bar_remover/best.pt"
+    confidence: 0.4
+    img_size: 416
+  
+  grayscale_conversion:
+    enabled: true  # Disable since images are already processed
+    mode: "RGB"
+  
+  image_filtering:
+    min_images_per_class: 5  # Lower threshold for test
+    max_images_per_class: null
+    skip_corrupted_images: true
+  
+  data_splitting:
+    train_ratio: 0.7
+    val_ratio: 0.2
+    test_ratio: 0.1
+    stratified: true
+    random_seed: 42
+  
+  augmentation:
+    enabled: true  # Disable for quick testing
+    target_images_per_class: 50
+    max_copies_per_image: 5
+    techniques:
+      horizontal_flip: 0.5
+      vertical_flip: 0.2
+      rotate_90: 0.3
+      brightness_contrast: 0.4
+      hue_saturation: 0.3
+      
+output:
+  base_path: "DATA/sample_csv_test"
+  processed_path: "DATA/sample_csv_test_processed"
+  final_dataset_path: "DATA/sample_csv_test_final_dataset"
+  create_dataset_yaml: true
+  
+logging:
+  wandb_enabled: false  # Disable W&B for testing
+  log_class_distribution: true
+  log_sample_images: false
+  log_processing_times: true
