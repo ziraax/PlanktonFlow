@@ -1,0 +1,48 @@
+method: bayes  
+metric:
+  goal: maximize
+  name: val/metrics/f1_macro
+
+parameters:
+  # Model related parameters
+  model_name:
+    values: ["resnet"]
+
+  resnet_variant:
+    values: ['18', '34', '50', '101', '152']  # Sweep over different efficient variants
+  # Loss related parameters
+  loss_type:
+    values: ["weighted", "focal", "labelsmoothing"]
+
+  focal_alpha:
+    min: 0.1
+    max: 0.5
+
+  focal_gamma:
+    min: 1.0
+    max: 3.0    
+
+  use_per_class_alpha:
+    values: [true, false]
+
+  labelsmoothing_epsilon:
+    min: 0.05
+    max: 0.2
+
+  # Hyperparameters
+  epochs:
+    value: 30
+
+  optimizer:
+    values: ["adamw", "adam"]
+
+  learning_rate:
+    values: [1e-7, 5e-7,1e-6, 5e-6,1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 2e-1]
+
+  weight_decay:
+    values: [1e-7, 5e-7,1e-6, 5e-6,1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 2e-1]
+
+  early_stopping_patience:
+    value: 15
+  device:
+    value: "cuda"

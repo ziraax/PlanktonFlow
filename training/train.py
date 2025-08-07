@@ -71,7 +71,7 @@ def _setup_training_environment(config):
             "loss_type": "focal",
             "focal_gamma": 2.0,
             "use_per_class_alpha": True,
-            "early_stopping_patience": 20,
+            "early_stopping_patience": 15,
             "batch_size": 64,
             "optimizer": "adamw",
             "learning_rate": 0.0004175,
@@ -212,11 +212,17 @@ def train_model(model, config, training_config_name=None):
 
     _setup_training_environment(config)
 
-    # Only initialize W&B if log_results is True
+    # Handle W&B initialization (check if already active for sweeps)
     if config.get('log_results', True):
-        run = _initialize_wandb(config)
-        run_name = run.name
-        print(f"[INFO] W&B logging enabled - Run: {run_name}")
+        # Check if W&B is already active (e.g., from sweep)
+        if wandb.run is not None:
+            run = wandb.run
+            run_name = run.name
+            print(f"[INFO] Using existing W&B run (sweep): {run_name}")
+        else:
+            run = _initialize_wandb(config)
+            run_name = run.name
+            print(f"[INFO] W&B logging enabled - Run: {run_name}")
     else:
         run = None
         # Use user-specified run name or generate default

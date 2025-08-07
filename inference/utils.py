@@ -11,6 +11,12 @@ def save_results(results, output_path):
         results (list): List of dicts containing image path and predictions.
         output_path (str): Path to save the output file.
     """
+    # Create output directory if it doesn't exist
+    output_dir = os.path.dirname(output_path)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        print(f"[INFO] Created output directory: {output_dir}")
+    
     flat_rows = []
     for item in results:
         image_name = os.path.basename(item['image_path'])
