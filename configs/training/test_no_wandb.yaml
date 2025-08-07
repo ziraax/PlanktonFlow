@@ -1,6 +1,9 @@
 # ============================================================
-# EfficientNet B5 Training Configuration for CSV Dataset
+# EfficientNet B5 Training Configuration for CSV Dataset - TEST (No W&B)
 # ============================================================
+
+run_name: "Ma_super_run"  # Custom run name for testing
+
 
 # DATA CONFIGURATION
 data:
@@ -24,9 +27,9 @@ training:
   batch_size: 32               # Training batch size
   learning_rate: 0.001         # Initial learning rate
   weight_decay: 0.01           # Weight decay (L2 regularization)
-  epochs: 5                    # Maximum number of epochs (quick test)
+  epochs: 10                   # Just 10 epoch for testing
   optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
-  early_stopping_patience: 15  # Early stopping patience
+  early_stopping_patience: 25  # Early stopping patience
   device: "cuda"               # Options: "cuda", "cpu", "auto"
   num_workers: 8               # Number of data loader workers
 
@@ -39,6 +42,6 @@ loss:
 
 # WEIGHTS & BIASES CONFIGURATION
 wandb:
-  log_results: false  # Keep simple for testing
-  tags: ["csv_test", "efficientnet", "b5", "focal_loss"]
-  notes: "EfficientNet B5 training on CSV preprocessed dataset"
+  log_results: false  # DISABLE W&B logging for testing
+  tags: ["test", "no_wandb", "efficientnet", "b5"]
+  notes: "Testing W&B disable functionality"

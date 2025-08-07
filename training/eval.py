@@ -16,15 +16,16 @@ from tqdm import tqdm
 from PIL import Image
 from tqdm import tqdm
 
-def evaluate_yolo_model(model_path, data_dir, run_name, config):
+def evaluate_yolo_model(model_path, data_dir, run_name, config, run=None):
 
-    wandb.init(
-        project=config['project_name'],
-        name=f"{config['model_name']}_{config['model_variant']}_evaluation_{run_name}",
-        job_type="Evaluation",
-        config=config,
-        tags=["evaluation", "custom_model", "classification", config['model_name']],
-    )
+    if run:
+        wandb.init(
+            project=config['project_name'],
+            name=f"{config['model_name']}_{config['model_variant']}_evaluation_{run_name}",
+            job_type="Evaluation",
+            config=config,
+            tags=["evaluation", "custom_model", "classification", config['model_name']],
+        )
 
 
     data_dir = Path(data_dir).resolve()
@@ -64,11 +65,12 @@ def evaluate_yolo_model(model_path, data_dir, run_name, config):
 
     # Log standard metrics
     print("[INFO] Logging standard metrics...")
-    log_core_metrics(y_true, y_pred, class_names)
+    log_core_metrics(y_true, y_pred, class_names, run=run, run_name=run_name, config=config)
     print("[INFO] Logging evaluation details...")
-    log_evaluation_details(y_true, y_pred, class_names)  
+    log_evaluation_details(y_true, y_pred, class_names, run=run, run_name=run_name, config=config)  
     print("[INFO] Evaluation complete.")
-    wandb.finish()
+    if run:
+        wandb.finish()
 
 def evaluate_metrics_only(model, split, criterion):
     model.eval()
@@ -111,51 +113,135 @@ def evaluate_metrics_only(model, split, criterion):
 
 # ---- LOGGING FUNCTIONS ---- #
 
-def log_core_metrics(y_true, y_pred, class_names, prefix="test"):
-    wandb.log({
-        f"{prefix}/metrics/accuracy": accuracy_score(y_true, y_pred),        
-        f"{prefix}/metrics/precision_macro": precision_score(y_true, y_pred, average="macro", zero_division=0),
-        f"{prefix}/metrics/precision_weighted": precision_score(y_true, y_pred, average="weighted", zero_division=0),
-        f"{prefix}/metrics/recall_macro": recall_score(y_true, y_pred, average="macro", zero_division=0),
-        f"{prefix}/metrics/recall_weighted": recall_score(y_true, y_pred, average="weighted", zero_division=0),
-        f"{prefix}/metrics/f1_macro": f1_score(y_true, y_pred, average="macro", zero_division=0),
-        f"{prefix}/metrics/f1_weighted": f1_score(y_true, y_pred, average="weighted", zero_division=0),
+def log_core_metrics(y_true, y_pred, class_names, prefix="test", run=None, run_name=None, config=None):
+    # Calculate metrics
+    accuracy = accuracy_score(y_true, y_pred)
+    f1_macro = f1_score(y_true, y_pred, average='macro', zero_division=0)
+    f1_weighted = f1_score(y_true, y_pred, average='weighted', zero_division=0)
+    precision_macro = precision_score(y_true, y_pred, average='macro', zero_division=0)
+    precision_weighted = precision_score(y_true, y_pred, average='weighted', zero_division=0)
+    recall_macro = recall_score(y_true, y_pred, average='macro', zero_division=0)
+    recall_weighted = recall_score(y_true, y_pred, average='weighted', zero_division=0)
+    
+    if run:  # Log to W&B if enabled
+        wandb.log({
+            f"{prefix}/metrics/accuracy": accuracy,        
+            f"{prefix}/metrics/precision_macro": precision_macro,
+            f"{prefix}/metrics/precision_weighted": precision_weighted,
+            f"{prefix}/metrics/recall_macro": recall_macro,
+            f"{prefix}/metrics/recall_weighted": recall_weighted,
+            f"{prefix}/metrics/f1_macro": f1_macro,
+            f"{prefix}/metrics/f1_weighted": f1_weighted,
+        })
+    
+    # Always print metrics locally
+    print(f"[{prefix.upper()} METRICS]")
+    print(f"  Accuracy: {accuracy:.4f}")
+    print(f"  F1 Macro: {f1_macro:.4f}")
+    print(f"  F1 Weighted: {f1_weighted:.4f}")
+    print(f"  Precision Macro: {precision_macro:.4f}")
+    print(f"  Precision Weighted: {precision_weighted:.4f}")
+    print(f"  Recall Macro: {recall_macro:.4f}")
+    print(f"  Recall Weighted: {recall_weighted:.4f}")
+    
+    # Save metrics to file (always, regardless of W&B)
+    if run_name and config:
+        # Save in the same directory as model weights
+        metrics_dir = Path("model_weights") / config["model_name"] / config.get("model_variant", "default") / run_name
+    else:
+        metrics_dir = Path("outputs") / "metrics"
+    
+    metrics_dir.mkdir(parents=True, exist_ok=True)
+    metrics_file = metrics_dir / f"{prefix}_metrics.json"
+    
+    metrics_data = {
+        "accuracy": accuracy,
+        "f1_macro": f1_macro,
+        "f1_weighted": f1_weighted,
+        "precision_macro": precision_macro,
+        "precision_weighted": precision_weighted,
+        "recall_macro": recall_macro,
+        "recall_weighted": recall_weighted,
+        "timestamp": datetime.now().isoformat(),
+        "class_count": len(class_names),
+        "sample_count": len(y_true)
+    }
+    
+    import json
+    with open(metrics_file, 'w') as f:
+        json.dump(metrics_data, f, indent=2)
+    
+    print(f"[INFO] Metrics saved to: {metrics_file}")
 
-    })
-
-def log_evaluation_details(y_true, y_pred, class_names):
+def log_evaluation_details(y_true, y_pred, class_names, run=None, run_name=None, config=None):
+    # Generate classification report
     report_dict = classification_report(y_true, y_pred, target_names=class_names, output_dict=True, zero_division=0)
     report_df = pd.DataFrame(report_dict).transpose().reset_index()
     report_df.rename(columns={"index": "class"}, inplace=True)
     # Filter the accuracy, macro avg, and weighted avg rows
-    report_df = report_df[~report_df['class'].isin(['accuracy', 'macro avg', 'weighted avg'])]
-    wandb.log({"classification_report": wandb.Table(dataframe=report_df)})
-
+    filtered_report_df = report_df[~report_df['class'].isin(['accuracy', 'macro avg', 'weighted avg'])]
+    
+    # Set up output directory
+    if run_name and config:
+        # Save in the same directory as model weights
+        output_dir = Path("model_weights") / config["model_name"] / config.get("model_variant", "default") / run_name
+    else:
+        output_dir = Path("outputs") / "metrics"
+    
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Save classification report to CSV
+    report_csv = output_dir / "classification_report.csv"
+    report_df.to_csv(report_csv, index=False)
+    print(f"[INFO] Classification report saved to: {report_csv}")
+    
+    if run:  # Log to W&B if enabled
+        wandb.log({"classification_report": wandb.Table(dataframe=filtered_report_df)})
+    
+    # Generate and save plots (both W&B and local files)
     # F1 Score
-    f1_sorted_df = report_df[report_df['class'].isin(class_names)].sort_values("f1-score")
+    f1_sorted_df = filtered_report_df[filtered_report_df['class'].isin(class_names)].sort_values("f1-score")
     plt.figure(figsize=(12, max(6, len(f1_sorted_df) * 0.3)))
     sns.barplot(data=f1_sorted_df, x='f1-score', y='class', hue='class', dodge=False, legend=False, palette='viridis')
     plt.title("F1 Score per Class (Sorted)")
     plt.xlim(0, 1)
-    wandb.log({"f1_score_per_class": wandb.Image(plt)})
+    
+    f1_plot_path = output_dir / "f1_score_per_class.png"
+    plt.savefig(f1_plot_path, dpi=300, bbox_inches='tight')
+    print(f"[INFO] F1 score plot saved to: {f1_plot_path}")
+    
+    if run:
+        wandb.log({"f1_score_per_class": wandb.Image(plt)})
     plt.close()
 
     # Precision
-    precision_sorted = report_df.sort_values("precision")
+    precision_sorted = filtered_report_df.sort_values("precision")
     plt.figure(figsize=(12, max(6, len(precision_sorted) * 0.3)))
     sns.barplot(data=precision_sorted, x='precision', y='class', hue='class', dodge=False, legend=False, palette='mako')
     plt.title("Precision per Class (Sorted)")
     plt.xlim(0, 1)
-    wandb.log({"precision_per_class": wandb.Image(plt)})
+    
+    precision_plot_path = output_dir / "precision_per_class.png"
+    plt.savefig(precision_plot_path, dpi=300, bbox_inches='tight')
+    print(f"[INFO] Precision plot saved to: {precision_plot_path}")
+    
+    if run:
+        wandb.log({"precision_per_class": wandb.Image(plt)})
     plt.close()
 
     # Recall
-    recall_sorted = report_df.sort_values("recall")
+    recall_sorted = filtered_report_df.sort_values("recall")
     plt.figure(figsize=(12, max(6, len(recall_sorted) * 0.3)))
     sns.barplot(data=recall_sorted, x='recall', y='class', hue='class', dodge=False, legend=False, palette='crest')
     plt.title("Recall per Class (Sorted)")
     plt.xlim(0, 1)
-    wandb.log({"recall_per_class": wandb.Image(plt)})
+    
+    recall_plot_path = output_dir / "recall_per_class.png"
+    plt.savefig(recall_plot_path, dpi=300, bbox_inches='tight')
+    print(f"[INFO] Recall plot saved to: {recall_plot_path}")
+    
+    if run:
+        wandb.log({"recall_per_class": wandb.Image(plt)})
     plt.close()
 
     # Confusion matrix raw
@@ -165,7 +251,19 @@ def log_evaluation_details(y_true, y_pred, class_names):
     plt.title("Confusion Matrix (Raw Counts)")
     plt.xlabel("Predicted")
     plt.ylabel("True")
-    wandb.log({"confusion_matrix_raw": wandb.Image(plt)})
+    
+    cm_raw_path = output_dir / "confusion_matrix_raw.png"
+    plt.savefig(cm_raw_path, dpi=300, bbox_inches='tight')
+    print(f"[INFO] Raw confusion matrix saved to: {cm_raw_path}")
+    
+    # Save raw confusion matrix as CSV
+    cm_raw_df = pd.DataFrame(cm, index=class_names, columns=class_names)
+    cm_raw_csv = output_dir / "confusion_matrix_raw.csv"
+    cm_raw_df.to_csv(cm_raw_csv)
+    print(f"[INFO] Raw confusion matrix CSV saved to: {cm_raw_csv}")
+    
+    if run:
+        wandb.log({"confusion_matrix_raw": wandb.Image(plt)})
     plt.close()
 
     # Confusion matrix normalized
@@ -175,16 +273,30 @@ def log_evaluation_details(y_true, y_pred, class_names):
     plt.title("Normalized Confusion Matrix")
     plt.xlabel("Predicted Class")
     plt.ylabel("True Class")
-    wandb.log({"normalized_confusion_matrix": wandb.Image(plt)})
+    
+    cm_norm_path = output_dir / "confusion_matrix_normalized.png"
+    plt.savefig(cm_norm_path, dpi=300, bbox_inches='tight')
+    print(f"[INFO] Normalized confusion matrix saved to: {cm_norm_path}")
+    
+    # Save normalized confusion matrix as CSV
+    cm_norm_df = pd.DataFrame(cm_norm, index=class_names, columns=class_names)
+    cm_norm_csv = output_dir / "confusion_matrix_normalized.csv"
+    cm_norm_df.to_csv(cm_norm_csv)
+    print(f"[INFO] Normalized confusion matrix CSV saved to: {cm_norm_csv}")
+    
+    if run:
+        wandb.log({"normalized_confusion_matrix": wandb.Image(plt)})
     plt.close()
+    
+    print(f"[INFO] All evaluation details saved to: {output_dir}")
 
 
 
-def run_test_full_evaluation(model, test_loader, data_dir, criterion=None):
+def run_test_full_evaluation(model, test_loader, data_dir, run=None, run_name=None, config=None, criterion=None):
     test_loss, top1, top5, y_true, y_pred, y_pred_logits = evaluate_metrics_only(model, test_loader, criterion=None)
 
     with open(Path(data_dir) / "dataset.yaml") as f:
         class_names = yaml.safe_load(f)['names']
 
-    log_core_metrics(y_true, y_pred, class_names, prefix="test")
-    log_evaluation_details(y_true, y_pred, class_names)
+    log_core_metrics(y_true, y_pred, class_names, prefix="test", run=run, run_name=run_name, config=config)
+    log_evaluation_details(y_true, y_pred, class_names, run=run, run_name=run_name, config=config)

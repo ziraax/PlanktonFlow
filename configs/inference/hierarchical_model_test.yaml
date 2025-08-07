@@ -1,0 +1,24 @@
+# Hierarchical-Trained EfficientNet B5 Inference Configuration
+# Using the model trained on hierarchical dataset with 5 classes
+model:
+  name: "efficientnet"
+  variant: "b5"
+  weights_path: "model_weights/efficientnet/b5/efficientnet_b5_training_20250806_141744/best.pt"
+  num_classes: 5  # Hierarchical dataset has 5 classes
+
+inference:
+  image_dir: "DATA/sample_hierarchical_final_dataset/test"
+  batch_size: 32
+  top_k: 5
+  device: "cuda"
+  save_csv: true
+  output_path: "outputs/hierarchical_model_inference.csv"
+
+# Optional preprocessing during inference
+preprocessing:
+  scalebar_removal: true
+  
+wandb:
+  log_results: false  # Keep simple for testing
+  tags: ["inference", "efficientnet", "b5", "hierarchical_dataset"]
+  notes: "Inference with hierarchical-trained EfficientNet B5 model (5 classes)"

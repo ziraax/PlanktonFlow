@@ -322,7 +322,8 @@ class ConfigPreprocessor:
                 class_dir.mkdir(exist_ok=True)
                 
                 src_path = Path(img_path)
-                dest_path = class_dir / f"{split}_{src_path.name}"
+                # Don't add split prefix - folder structure is sufficient
+                dest_path = class_dir / src_path.name
                 
                 if not dest_path.exists() and src_path.exists():
                     shutil.copy(src_path, dest_path)

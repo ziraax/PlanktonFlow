@@ -4,12 +4,12 @@
 input_source:
   type: "ecotaxa"
   data_path: "DATA/sample_ecotaxa"
-  metadata_file: "ecotaxa_export_final.tsv"
+  metadata_file: "ecotaxa_export__TSV_17354_20250616_1138.tsv"
   separator: "\t"
 
 preprocessing:
   scalebar_removal:
-    enabled: true  # Enable sfor testing since images are already processed
+    enabled: true  
     model_path: "models/model_weights/scale_bar_remover/best.pt"
     confidence: 0.4
     img_size: 416
@@ -31,7 +31,7 @@ preprocessing:
     random_seed: 42
   
   augmentation:
-    enabled: false  # Disable for quick testing
+    enabled: true  # Disable for quick testing
     target_images_per_class: 100
     max_copies_per_image: 3
     techniques:
@@ -42,9 +42,9 @@ preprocessing:
       hue_saturation: 0.3
       
 output:
-  base_path: "DATA/test_ecotaxa_output"
-  processed_path: "DATA/test_ecotaxa_output/processed"
-  final_dataset_path: "DATA/test_ecotaxa_output/final_dataset"
+  base_path: "DATA/sample_ecotaxa"
+  processed_path: "DATA/test_ecotaxa_processed"
+  final_dataset_path: "DATA/test_ecotaxa_final_dataset"
   create_dataset_yaml: true
   
 logging:

@@ -129,6 +129,16 @@ def normalize_config_for_training(config):
         normalized['focal_gamma'] = loss_config.get('focal_gamma', 2.0)
         normalized['use_per_class_alpha'] = loss_config.get('use_per_class_alpha', True)
     
+    # Extract nested wandb config
+    if 'wandb' in config:
+        wandb_config = config['wandb']
+        normalized['log_results'] = wandb_config.get('log_results', True)
+        normalized['wandb_tags'] = wandb_config.get('tags', [])
+        normalized['wandb_notes'] = wandb_config.get('notes', '')
+    else:
+        # Default to True if no wandb config specified
+        normalized['log_results'] = True
+    
     return normalized
 
 
