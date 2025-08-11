@@ -10,9 +10,10 @@ An end-to-end deep learning solution supporting multiple model architectures wit
 
 ### Preprocessing 
 Tailored for our dataset — customizable for yours.
-
+- **Multiple Data Input Format**: Wether your dataset is from EcoTaxa, already organised in classical classification form or using a CSV/TSV file, everything is implemented
 - **Data Augmentation**: Allows to augment the training data to limit the class imbalance issue
 - **Scalebar Removal**: Allows to detect and delete scale bars that were originally present in some images using a YOLOv8 model. 
+- **Automatic Data Splitting**: The tool makes preprocessing entirely configurable, with automatic data splitting for training/evaluation and generates automaticly yaml configuration files
 
 
 ### Training 
@@ -20,16 +21,17 @@ Tailored for our dataset — customizable for yours.
 - **Advanced Training**:
   - Configurable hyperparameters
   - Early stopping with checkpointing
-  - Class-weighted loss functions
+  - Multiple loss functions
   - More features
 - **Model Factory Pattern**: Dynamic model creation with variants
-- **W&B Integration**: Real-time tracking of metrics, artifacts, and model versions
+- **Tracking & Integration**: Real-time tracking of metrics, weights, and model versions using either Weights & Biases or our custom module
 
 ### Inference 
 - **Batch Processing**: Efficient handling of image directories
 - **Flexible Output**:
   - Top-K predictions
   - CSV export capabilities
+  - 
 - **Production Ready**: Device-aware execution (CPU/GPU)
 
 ## Installation
@@ -57,7 +59,7 @@ If you are not familiar with Git, you can simply click the green "<> Code" butto
 
 3. **Create a virtual environment**:
 
-Virtual environments in Python are isolated directories that contain their own Python interpreter and libraries, allowing you to manage dependencies for each project separately. This prevents conflicts between packages required by different projects and ensures reproducible setups. This comes handy on project like this one where there a lot of dependencies. 
+Virtual environments in Python are isolated directories that contain their own Python interpreter and libraries, allowing you to manage dependencies for each project separately. This prevents conflicts between packages required by different projects and ensures reproducible setups. This comes in handy in a project like this one, where there are a lot of dependencies.
 
 To create a virtual environment, open a terminal in the folder where you downloaded the project and run :
 
@@ -121,124 +123,466 @@ wandb login
 ``` 
 Then follow instructions. 
 
-We recommend enabling WandB logging for experiment tracking. Weights & Biases includes a generous free tier.
 
 ## Usages
 
+This chapter goes through all the different usages that a user may have with the pipeline. The system is designed around YAML configuration files that make it easy to reproduce experiments and manage different setups.
+
 ### To preprocess your data
 
-TODO
+The preprocessing system supports three different data input formats. Choose the configuration that matches your data organization:
 
-### To train a model :
+#### 1. Hierarchical Data Format (Folder-based)
+If your data is organized in folders where each folder name represents a class:
 
-Your dataset should be organized in a directory structure compatible with common deep learning frameworks. Each class should have its own subfolder containing all images belonging to that class. For example:
-
-```
-dataset/
-  classA/
-    img1.jpg
-    img2.jpg
-    ...
-  classB/
-    img1.jpg
-    img2.jpg
-    ...
-  classC/
-    img1.jpg
-    ...
+```bash
+python3 run_preprocessing.py --config configs/preprocessing/simple_hierarchical.yaml
 ```
 
-This structure allows the pipeline to automatically infer class labels based on folder names and efficiently load images for training and inference.
+Example configuration (`configs/preprocessing/simple_hierarchical.yaml`):
+```yaml
+# Simple Hierarchical Dataset Preprocessing Configuration
+input_source:
+  type: "hierarchical"
+  data_path: "DATA/your_hierarchical_dataset"
+  subdirs: []  # Empty = direct class folders under data_path
 
-If you already have your dataset split into `train`, `val`, and `test` directories and your dataset is already preprocessed, you can skip directly to the training step. The pipeline fully supports this structure, and will automatically use the provided splits for training, validation, and testing. Your directory should look like:
+preprocessing:
+  scalebar_removal:
+    enabled: true
+    model_path: "models/model_weights/scale_bar_remover/best.pt"
+    confidence: 0.4
+    img_size: 416
+  
+  grayscale_conversion:
+    enabled: true
+    mode: "RGB"
+  
+  image_filtering:
+    min_images_per_class: 10
+    max_images_per_class: null
+    skip_corrupted_images: true
+  
+  data_splitting:
+    train_ratio: 0.7
+    val_ratio: 0.2
+    test_ratio: 0.1
+    stratified: true
+    random_seed: 42
+  
+  augmentation:
+    enabled: true
+    target_images_per_class: 100
+    max_copies_per_image: 5
+    techniques:
+      horizontal_flip: 0.5
+      vertical_flip: 0.2
+      rotate_90: 0.3
+      brightness_contrast: 0.4
+      hue_saturation: 0.3
+      
+output:
+  base_path: "DATA/your_dataset"
+  processed_path: "DATA/your_dataset_processed"
+  final_dataset_path: "DATA/your_dataset_final"
+  create_dataset_yaml: true
+  
+logging:
+  wandb_enabled: false
+  log_class_distribution: true
+  log_sample_images: false
+  log_processing_times: true
+```
+
+#### 2. CSV/TSV Mapping Format
+If you have a CSV/TSV file mapping image paths to class labels:
+
+```bash
+python3 run_preprocessing.py --config configs/preprocessing/csv_mapping_test.yaml
+```
+
+Example configuration:
+```yaml
+# CSV Mapping Dataset Preprocessing Configuration
+input_source:
+  type: "csv_mapping"
+  images_path: "DATA/your_images_directory"
+  metadata_file: "DATA/your_labels.csv"
+  image_column: "filename"
+  label_column: "species"
+  separator: ","
+  image_path_prefix: ""
+
+preprocessing:
+  scalebar_removal:
+    enabled: true
+    model_path: "models/model_weights/scale_bar_remover/best.pt"
+    confidence: 0.4
+    img_size: 416
+  
+  grayscale_conversion:
+    enabled: true
+    mode: "RGB"
+  
+  image_filtering:
+    min_images_per_class: 10
+    max_images_per_class: null
+    skip_corrupted_images: true
+  
+  data_splitting:
+    train_ratio: 0.7
+    val_ratio: 0.2
+    test_ratio: 0.1
+    stratified: true
+    random_seed: 42
+  
+  augmentation:
+    enabled: true
+    target_images_per_class: 100
+    max_copies_per_image: 5
+    techniques:
+      horizontal_flip: 0.5
+      vertical_flip: 0.2
+      rotate_90: 0.3
+      brightness_contrast: 0.4
+      hue_saturation: 0.3
+      
+output:
+  base_path: "DATA/your_dataset"
+  processed_path: "DATA/your_dataset_processed"
+  final_dataset_path: "DATA/your_dataset_final"
+  create_dataset_yaml: true
+  
+logging:
+  wandb_enabled: false
+  log_class_distribution: true
+  log_sample_images: false
+  log_processing_times: true
+```
+
+#### 3. EcoTaxa Format
+For data exported from EcoTaxa platform:
+
+```bash
+python3 run_preprocessing.py --config configs/preprocessing/ecotaxa_test.yaml
+```
+
+Example configuration:
+```yaml
+# EcoTaxa TSV Preprocessing Configuration
+input_source:
+  type: "ecotaxa"
+  data_path: "DATA/your_ecotaxa_folder"
+  metadata_file: "ecotaxa_export_TSV_xxxxx.tsv"
+  separator: "\t"
+
+preprocessing:
+  scalebar_removal:
+    enabled: true  
+    model_path: "models/model_weights/scale_bar_remover/best.pt"
+    confidence: 0.4
+    img_size: 416
+  
+  grayscale_conversion:
+    enabled: false  # Usually not needed for EcoTaxa images
+    mode: "RGB"
+  
+  image_filtering:
+    min_images_per_class: 10  # Minimum samples per class
+    max_images_per_class: null
+    skip_corrupted_images: true
+  
+  data_splitting:
+    train_ratio: 0.7
+    val_ratio: 0.2
+    test_ratio: 0.1
+    stratified: true  # Can be disabled if classes are too imbalanced
+    random_seed: 42
+  
+  augmentation:
+    enabled: true
+    target_images_per_class: 100
+    max_copies_per_image: 3
+    techniques:
+      horizontal_flip: 0.5
+      vertical_flip: 0.2
+      rotate_90: 0.3
+      brightness_contrast: 0.4
+      hue_saturation: 0.3
+      
+output:
+  base_path: "DATA/your_ecotaxa"
+  processed_path: "DATA/your_ecotaxa_processed"
+  final_dataset_path: "DATA/your_ecotaxa_final"
+  create_dataset_yaml: true
+  
+logging:
+  wandb_enabled: false
+  log_class_distribution: true
+  log_sample_images: false
+  log_processing_times: true
+```
+
+### To train a model
+
+Training is fully configuration-driven. You can train different model architectures with various hyperparameters:
+
+```bash
+python3 run_training.py --config configs/training/your_training_config.yaml
+```
+
+#### Basic Training Example
+
+Example configuration (`configs/training/efficientnet_example.yaml`):
+```yaml
+# ============================================================
+# EfficientNet B5 Training Configuration
+# ============================================================
+
+run_name: "efficientnet_b5_experiment"  # Custom run name
+
+# DATA CONFIGURATION
+data:
+  dataset_path: "DATA/your_dataset_final"  # Path to preprocessed dataset
+  
+# PROJECT CONFIGURATION
+project:
+  name: "YOLOv11Classification500"     # W&B project name
+  
+# MODEL CONFIGURATION
+model:
+  name: "efficientnet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
+  variant: "b5"             # EfficientNet variants: "b0"-"b7"
+  pretrained: true          # Use pretrained weights
+  freeze_backbone: false    # Freeze backbone layers
+  input_size: 224           # Input image size
+  num_classes: 76           # Number of output classes
+  
+# TRAINING CONFIGURATION
+training:
+  batch_size: 32               # Training batch size
+  learning_rate: 0.001         # Initial learning rate
+  weight_decay: 0.01           # Weight decay (L2 regularization)
+  epochs: 50                   # Number of training epochs
+  optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
+  early_stopping_patience: 15  # Early stopping patience
+  device: "cuda"               # Options: "cuda", "cpu", "auto"
+  num_workers: 8               # Number of data loader workers
+
+# LOSS CONFIGURATION
+loss:
+  type: "focal"                # Options: "focal", "labelsmoothing", "weighted", "crossentropy"
+  focal_alpha: 1.0             # Focal loss alpha parameter
+  focal_gamma: 2.0             # Focal loss gamma parameter
+  use_per_class_alpha: true    # Use per-class weights
+
+# WEIGHTS & BIASES CONFIGURATION
+wandb:
+  log_results: true            # Enable W&B logging
+  tags: ["efficientnet", "b5", "production"]
+  notes: "Production training run"
+```
+
+#### Advanced Training Features
+
+**Multiple Model Architectures:**
+- **EfficientNet**: `variant: "b0"` to `"b7"`
+- **ResNet**: `variant: "18"`, `"34"`, `"50"`, `"101"`, `"152"`
+- **DenseNet**: `variant: "121"`, `"161"`, `"169"`, `"201"`
+- **YOLOv11**: `name: "yolov11"`
+
+**Loss Functions:**
+```yaml
+# Focal Loss (good for imbalanced datasets)
+loss:
+  type: "focal"
+  focal_gamma: 2.0
+  focal_alpha: 1.0
+  use_per_class_alpha: true
+
+# Label Smoothing
+loss:
+  type: "labelsmoothing"
+  labelsmoothing_epsilon: 0.1
+
+# Weighted Cross-Entropy (automatic class balancing)
+loss:
+  type: "weighted"
 
 ```
-dataset/
-  train/
-    classA/
-      img1.jpg
-      ...
-    classB/
-      ...
-  val/
-    classA/
-      ...
-    classB/
-      ...
-  test/
-    classA/
-      ...
-    classB/
-      ...
-```
 
-Then modify in **config.py** the path to your own dataset. TODO
+**Training Without Weights & Biases:**
+```yaml
+# Disable W&B for offline training
+wandb:
+  log_results: false
+  tags: ["offline", "test"]
+  notes: "Local training without W&B"
+
+run_name: "offline_experiment"
+
+# All metrics and plots will be saved locally to:
+# model_weights/{model_name}/{variant}/{run_name}/
+```
 
 ### Inference (Making predictions)
 
-To make inference, you need to have a folder containing all your images.
-
-In case you have trained your own model, you want to use the inference pipeline with specified model parameters.
+Use trained models to make predictions on new images:
 
 ```bash
-python -m inference.predict \
-  --image_dir PATH/TO/YOUR/IMAGES \
-  --model_name [resnet, densenet, efficientnet, yolov11] \
-  --weights_path model_weights/[model_type]/[model_variant]/[run] \
-  --densenet_variant 121 \
-  --resnet_variant
-  --efficientnet_variant 
-  --save_csv predictions.csv \
-  --wandb_log
+python3 run_inference.py --config configs/inference/your_inference_config.yaml
 ```
 
-An exemple could be : 
+Example configuration (`configs/inference/production_inference.yaml`):
+```yaml
+# Model Configuration
+model:
+  name: "efficientnet"      # Model architecture: "efficientnet", "resnet", "densenet", "yolov11"
+  variant: "b5"             # Model variant
+  weights_path: "model_weights/efficientnet/b5/my_experiment/best.pt"
+  num_classes: 76           # Number of classes (must match training)
+
+# Inference Configuration
+inference:
+  image_dir: "path/to/new/images"        # Directory containing images to predict
+  batch_size: 32                        # Inference batch size
+  top_k: 5                              # Return top K predictions per image
+  device: "cuda"                        # Device: "cuda", "cpu", "auto"
+  save_csv: true                        # Save results as CSV
+  output_path: "outputs/predictions.csv" # Output file path
+
+# Optional preprocessing during inference
+preprocessing:
+  scalebar_removal: true                # Apply scalebar removal if needed
+  
+# Weights & Biases Configuration
+wandb:
+  log_results: false                    # Usually disabled for inference
+  tags: ["inference", "production"]
+  notes: "Production inference run"
+```
+
+**Inference Output:**
+The system generates:
+- CSV file with detailed predictions and confidence scores (specified in `output_path`)
+- Predictions include top-K classes with probabilities for each image
+- Optional scalebar preprocessing applied automatically if enabled
+
+**Advanced Inference Features:**
+```yaml
+# Multiple output formats
+inference:
+  save_csv: true                        # CSV with detailed results
+  output_path: "results/detailed_predictions.csv"
+  
+# Preprocessing during inference
+preprocessing:
+  scalebar_removal: true                # Remove scalebars before prediction
+  
+# Model-specific settings
+model:
+  num_classes: 76                       # Must match training dataset
+  weights_path: "path/to/best.pt"       # Path to trained model weights
+```
+
+### Hyperparameter Optimization
+
+Perform automated hyperparameter sweeps using Weights & Biases:
 
 ```bash
-python -m inference.predict \
-  --image_dir DATA\ecotaxa_infer_set 
-  --model_name densenet 
-  --densenet_variant 121 
-  --weights_path model_weights\densenet\121\leafy-sweep-26\best.pt 
-  --batch_size 64 
-  --top_k 3 
-  --device cpu 
-  --save_csv outputs/res_inference_infer.csv 
-  --wandb_log
-``` 
+python3 run_sweep.py --sweep_config configs/sweeps/densenet_sweep.yaml
+```
 
-Note that the `output` folder to save the csv containing results must exist before launching the inference process. 
+Example sweep configuration (`configs/sweeps/densenet_sweep.yaml`):
+```yaml
+# Sweep configuration
+program: run_sweep.py
+method: bayes  # or random, grid
+metric:
+  name: val/metrics/accuracy_top1
+  goal: maximize
 
-| Flag             | Description                       |
-| ---------------- | --------------------------------- |
-| `--image_dir`    | Folder containing images          |
-| `--model_name`   | Model architecture                |
-| `--weights_path` | Path to trained weights           |
-| `--top_k`        | Number of top predictions to keep |
-| `--device`       | `"cpu"` or `"cuda"` depending on your computer (use `"cuda"` if you have a modern GPU)              |
-| `--save_csv`     | Path to save predictions as CSV   |
-| `--wandb_log`    | Enable experiment logging to W\&B |
+# Fixed parameters
+parameters:
+  model_name:
+    value: densenet
+  epochs:
+    value: 30
+  device:
+    value: cuda
 
+  # Parameters to optimize
+  densenet_variant:
+    values: [121, 161, 169, 201]
+  
+  batch_size:
+    values: [32, 64]
+    
+  learning_rate:
+    distribution: log_uniform_values
+    min: 1e-6
+    max: 1e-3
+    
+  loss_type:
+    values: ["focal", "labelsmoothing", "weighted"]
+    
+  # Focal loss parameters (when applicable)
+  focal_gamma:
+    distribution: uniform
+    min: 1.0
+    max: 3.0
+```
 
-## Model Factory
+**Running Sweeps:**
+1. The sweep automatically creates multiple training runs
+2. Each run tests different hyperparameter combinations
+3. Results are logged to Weights & Biases for comparison
+4. Best configurations are automatically identified
 
-TODO
+### Quick Start Examples
 
-## Configuration
+**Complete Workflow Example:**
+```bash
+# 1. Preprocess your data
+python3 run_preprocessing.py --config configs/preprocessing/my_data.yaml
 
-TODO
+# 2. Train a model
+python3 run_training.py --config configs/training/efficientnet_production.yaml
+
+# 3. Make predictions
+python3 run_inference.py --config configs/inference/production_inference.yaml
+```
 
 ## Results and monitoring 
 
 TODO
 
-## Contributing 
+## 🤝 Contributing
 
-TODO
+We welcome all pull requests — from small fixes to big new features.  
+If you’d like to help improve this project, please check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines and the contribution workflow.
 
-## License
 
-TODO
+## 📚 Citation
+
+If you use this project in your research, please cite it as:
+
+```bibtex
+@software{walter2025pipeline,
+  author = {Hugo WALTER},
+  title = {Deep Learning Classification Pipeline for Automatic Plankton Classification},
+  year = {2025},
+  publisher = {GitHub},
+  url = {https://github.com/ziraax/TaxoNet}
+}
+```
+
+## 📝 License
+
+This project is open source and distributed under the [MIT License](./LICENSE.md).  
+See the `LICENSE.md` file for details.
+
+
 
 
 

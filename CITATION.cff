@@ -1,0 +1,27 @@
+
+### **CITATION.cff**
+```yaml
+cff-version: 1.2.0
+message: "If you use this project, please cite it using the metadata below."
+title: "Deep Learning Classification Pipeline"
+authors:
+  - family-names: "WALTER"
+    given-names: "Hugo"
+date-released: 2025-08-11
+version: "1.0.0"
+doi: "" # optional, if you have a Zenodo DOI
+license: "MIT"
+repository-code: "https://github.com/yourusername/yourrepo"
+url: "https://github.com/yourusername/yourrepo"
+keywords:
+  - "deep learning"
+  - "classification"
+  - "computer vision"
+  - "pytorch"
+  - "yolo"
+  - "efficientnet"
+  - "resnet"
+  - "densenet"
+  - "data preprocessing"
+  - "model training"
+  - "hyperparameter tuning"
