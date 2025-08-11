@@ -1,4 +1,4 @@
-# Contributing to [PROJECT NAME]
+# Contributing to this project
 
 Thank you for your interest in contributing! 🎉  
 This document explains the standard workflow and guidelines for contributing to this project.
