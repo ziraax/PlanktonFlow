@@ -3,16 +3,16 @@
 model:
   name: "efficientnet"
   variant: "b5"
-  weights_path: "model_weights/efficientnet/b5/efficientnet_b5_training_20250806_142450/best.pt"
-  num_classes: 5  # CSV dataset has 5 classes
+  weights_path: "model_weights/efficientnet/b5/EcoTaxa_reproduce_best_model_20250813_112759/checkpoints/checkpoint_epoch_14.pt"
+  num_classes: 76  # CSV dataset has 5 classes
 
 inference:
   image_dir: "DATA/inference/ecotaxa_infer_set"
-  batch_size: 32
+  batch_size: 64
   top_k: 5
   device: "cuda"
   save_csv: true
-  output_path: "outputs/csv_model_inference22.csv"
+  output_path: "outputs/csv_model_inference_work_pls.csv"
 
 # Optional preprocessing during inference
 preprocessing:

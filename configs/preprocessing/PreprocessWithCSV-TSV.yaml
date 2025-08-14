@@ -1,0 +1,74 @@
+# CSV/TSV Mapping Dataset Preprocessing Configuration
+# E.g you have a folder YourCSV-TSVDataset with a subfolder images with all your images 
+# and a CSV/TSV file for example the MyCSV-TSVDataset/image_labels.csv that contains the labels
+# for each image in the images folder.
+
+
+input_source:
+  # This tells the preprocessing script that the input source is a CSV/TSV mapping dataset
+  type: "csv_mapping"
+  images_path: "DATA/YourCSV-TSVDataset/images"
+  metadata_file: "DATA/YourCSV-TSVDataset/image_labels.csv"
+  image_column: "filename" # Column in the CSV/TSV file that contains the image filenames
+  label_column: "species" # Column in the CSV/TSV file that contains the image labels 
+  separator: "," # Separator used in the CSV/TSV file, can be "," for CSV or "\t" for TSV
+  image_path_prefix: "" # If your images are in a subfolder, you can specify the prefix here, shouldn't be needed in most cases
+
+preprocessing:
+  # Enable scalebar removal if needed, depending on wether your dataset requires it
+  scalebar_removal:
+    enabled: true
+    model_path: "models/model_weights/scale_bar_remover/best.pt" # This shouldnt be changed
+    confidence: 0.4 # Confidence threshold for scalebar removal, 0.4 has been found to work well
+    img_size: 416 # Image size for scalebar removal model
+  
+  grayscale_conversion:
+    enabled: true # This parameter can be set to false if your images are already in RGB format
+    mode: "RGB"
+  
+  image_filtering:
+    min_images_per_class: 10  # Minimum number of images per class to keep
+    max_images_per_class: null # No upper limit on images per class (null means no limit), or set to a specific number
+    skip_corrupted_images: true
+  
+  data_splitting:
+    train_ratio: 0.7
+    val_ratio: 0.2
+    test_ratio: 0.1
+    stratified: true
+    random_seed: 42
+  
+  augmentation:
+    enabled: true
+    target_images_per_class: 50  # Depending on your dataset size, you can adjust this number
+    # This is the target number of images per class after augmentation
+    # If you have a small dataset, you might want to lower this number, or vice versa
+
+    max_copies_per_image: 5 # Maximum number of augmented copies per image
+
+    # Augmentation techniques to apply, you can adjust the probabilities based on your dataset but
+    # these values are generally good starting points
+    techniques:
+      horizontal_flip: 0.5
+      vertical_flip: 0.2
+      rotate_90: 0.3
+      brightness_contrast: 0.4
+      hue_saturation: 0.3
+      
+output:
+  # Base path for output files
+  base_path: "DATA/YourCSV-TSVDataset"
+  # Processed path where files with no scale bars will be saved
+  processed_path: "DATA/YourCSV-TSVDataset_processed"
+  # Final dataset path where the final dataset will be saved
+  final_dataset_path: "DATA/YourCSV-TSVDataset_final_dataset"
+  # Unless you already have a dataset YAML file correctly formatted, please always set this to true since its needed for training
+  create_dataset_yaml: true
+  
+logging:
+  # Disable W&B logging for preprocessing
+  wandb_enabled: false  
+  # These features are not yet implemented 
+  log_class_distribution: true
+  log_sample_images: false
+  log_processing_times: true

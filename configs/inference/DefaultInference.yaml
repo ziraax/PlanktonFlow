@@ -1,0 +1,24 @@
+# CSV-Trained EfficientNet B5 Inference Configuration
+# Using the model trained on CSV dataset with 5 classes
+model:
+  name: "efficientnet" # Or densenet, resnet, yolov11
+  variant: "b5" # Model variant 
+  weights_path: "path/to/your/model/weights"
+  num_classes: 5  # Number of classes 
+
+inference:
+  image_dir: "path/to/your/inference/images" # Directory containing images for inference
+  batch_size: 64 # Batch size for inference, your might need to adjust this based on your GPU memory
+  top_k: 5 # Number of top predictions to return
+  device: "cuda" # Device to run inference on, options: "cuda", "cpu", "auto"
+  save_csv: true # Save results to CSV
+  output_path: "outputs/saved_results.csv" # Path to save the inference results CSV
+
+# Optional preprocessing during inference
+preprocessing:
+  scalebar_removal: true # If you want to remove scalebars before inference, set this to true, e.g if your images contain scalebars
+  
+wandb:
+  log_results: false  # Whether or not you want to log results to Weights & Biases
+  tags: ["inference", "csv_dataset"]
+  notes: "Inference with custom model (5 classes)"

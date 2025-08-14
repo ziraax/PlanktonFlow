@@ -1,0 +1,52 @@
+# ============================================================
+# DenseNet 161 Production Configuration with ALL OPTIONS
+# ============================================================
+
+# This configuration file is designed to train a DenseNet 161 Model 
+# Its a good starting point for your experimentations, but feel free to modify it. 
+
+run_name: "DenseNet_Default_Config"  # Custom run name for testing
+
+
+# DATA CONFIGURATION
+data:
+  dataset_path: "DATA/final_dataset"  # Path to dataset.yaml
+  
+# PROJECT CONFIGURATION
+project:
+  name: "YourWandBProjectName"     # W&B project name
+
+# MODEL CONFIGURATION
+model:
+  name: "densenet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
+  variant: "161"             
+  pretrained: true          # Use pretrained weights
+  freeze_backbone: false    # Freeze backbone layers
+  input_size: 224           # Input image size (224, 256, 384, etc.)
+  num_classes: 76           # Number of output classes - typically from your dataset.yaml
+
+
+# TRAINING CONFIGURATION
+training:
+  batch_size: 64               # Training batch size
+  learning_rate: 0.000001        # Initial learning rate
+  weight_decay: 0.001           # Weight decay (L2 regularization)
+  epochs: 30                    # Maximum number of epochs
+  optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
+  early_stopping_patience: 15  # Early stopping patience
+  device: "cuda"               # Options: "cuda", "cpu", "auto"
+  num_workers: 8               # Number of data loader workers
+  
+
+# LOSS CONFIGURATION
+loss:
+  type: "labelsmoothing"       # Options: "focal", "labelsmoothing", "weighted"
+  label_smoothing: 0.06551355150302052         # Label smoothing parameter (0.0-1.0)
+  use_per_class_alpha: false    # Use per-class weights
+  
+
+# WEIGHTS & BIASES CONFIGURATION
+wandb:
+  log_results: false
+  tags: ["reproduce", "densenet", "161"]
+  notes: "Reproduce Best DenseNet 161"

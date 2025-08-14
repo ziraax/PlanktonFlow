@@ -2,49 +2,53 @@
 # EfficientNet B5 Production Configuration with ALL OPTIONS
 # ============================================================
 
-run_name: "Reproduce_best_model"  # Custom run name for testing
+run_name: "Reproduce_Best_DenseNet"  # Custom run name for testing
 
 
 # DATA CONFIGURATION
 data:
-  dataset_path: "DATA/final_dataset"  # Path to dataset.yaml
+  dataset_path: "DATA/final_dataset"  # Path to your dataset 
   
 # PROJECT CONFIGURATION
 project:
-  name: "YOLOv11Classification500"     # W&B project name
+  name: "YourWandBProjectName"     # W&B project name
   # run_name: "custom_run_name"        # Optional: custom run name
   # group: "experiment_group"          # Optional: experiment group
 
 # MODEL CONFIGURATION
 model:
-  name: "efficientnet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
-  variant: "b5"             # EfficientNet variants: "b0"-"b7", ResNet: "18","34","50","101","152"
+  name: "densenet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
+  variant: "161"             
   pretrained: true          # Use pretrained weights
   freeze_backbone: false    # Freeze backbone layers
   input_size: 224           # Input image size (224, 256, 384, etc.)
   num_classes: 76           # Number of output classes
   
+  # Additional model options:
+  # dropout_rate: 0.2              # Dropout rate (0.0-1.0)
+  # use_se_blocks: true            # Use Squeeze-and-Excitation blocks
 
 # TRAINING CONFIGURATION
 training:
   batch_size: 64               # Training batch size
-  learning_rate: 1e-5        # Initial learning rate
-  weight_decay: 1e-4           # Weight decay (L2 regularization)
+  learning_rate: 0.000001        # Initial learning rate
+  weight_decay: 0.001           # Weight decay (L2 regularization)
   epochs: 30                    # Maximum number of epochs
-  optimizer: "adam"           # Options: "adam", "adamw", "sgd", "rmsprop"
+  optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
   early_stopping_patience: 15  # Early stopping patience
   device: "cuda"               # Options: "cuda", "cpu", "auto"
   num_workers: 8               # Number of data loader workers
-
+  
 
 # LOSS CONFIGURATION
 loss:
   type: "labelsmoothing"       # Options: "focal", "labelsmoothing", "weighted"
-  label_smoothing: 0.118590893086864         # Label smoothing parameter (0.0-1.0)
-  use_per_class_alpha: true    # Use per-class weights
+  label_smoothing: 0.06551355150302052         # Label smoothing parameter (0.0-1.0)
+  use_per_class_alpha: false    # Use per-class weights
+  
 
 # WEIGHTS & BIASES CONFIGURATION
 wandb:
   log_results: false
-  tags: ["production", "efficientnet", "b5", "label_smoothing"]
-  notes: "Production EfficientNet B5 with label smoothing"
+  tags: ["reproduce", "densenet", "161"]
+  notes: "Reproduce Best DenseNet 161"

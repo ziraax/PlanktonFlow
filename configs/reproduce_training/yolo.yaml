@@ -1,0 +1,30 @@
+# ============================================================
+# YOLOv11 Default-cls Production Configuration with ALL OPTIONS
+# ============================================================
+
+run_name: "Reproduce_YOLOv11"  # Custom run name for testing
+
+
+# DATA CONFIGURATION
+data:
+  dataset_path: "DATA/final_dataset"  # Path to your dataset 
+  
+# PROJECT CONFIGURATION
+project:
+  name: "YourWandBProjectName"     # W&B project name
+
+# MODEL CONFIGURATION
+model:
+  name: "yolov11"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
+  variant: "Default-cls"             
+  pretrained: true          # Use pretrained weights
+  freeze_backbone: false    # Freeze backbone layers
+  input_size: 224           # Input image size (224, 256, 384, etc.)
+  num_classes: 76           # Number of output classes
+
+
+# WEIGHTS & BIASES CONFIGURATION
+wandb:
+  log_results: false
+  tags: ["reproduce", "yolov11", "Default-cls"]
+  notes: "Reproduce YOLOv11 Default-cls"

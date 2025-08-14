@@ -7,7 +7,7 @@ run_name: "Ma_super_run_ecotaxa"  # Custom run name for testing
 
 # DATA CONFIGURATION
 data:
-  dataset_path: "DATA/test_ecotaxa_final_dataset"  # Path to CSV preprocessed dataset
+  dataset_path: "DATA/sample_hierarchical_final_dataset"  # Path to CSV preprocessed dataset
   
 # PROJECT CONFIGURATION
 project:

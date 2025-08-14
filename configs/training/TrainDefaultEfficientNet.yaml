@@ -1,0 +1,58 @@
+# ============================================================
+# EfficientNet B5 Production Configuration with ALL OPTIONS
+# ============================================================
+
+# This configuration file is designed to train an EfficientNet B5 Model 
+# which gave the best performances on our EcoTaxa dataset.
+# Its a good starting point for your experimentations, but feel free to modify it. 
+
+# Custom training run name, used for tracking and so you can easily find your run
+run_name: "EfficientNet_Default_Config"  # Custom run name for testing
+
+# DATA CONFIGURATION
+data:
+  # Typically this is the path to your MyOwnDataset_final_dataset after preprocessing
+  dataset_path: "DATA/final_dataset"  # Path to dataset.yaml
+  
+# PROJECT CONFIGURATION
+project:
+  name: "YourWandBProjectName"     # W&B project name
+
+# MODEL CONFIGURATION
+model:
+  name: "efficientnet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
+  variant: "b5"             # EfficientNet variants: "b0"-"b7"
+  pretrained: true          # Use pretrained weights
+  freeze_backbone: false    # Freeze backbone layers
+  input_size: 224           # Input image size (224, 256, 384, etc.)
+  num_classes: 76           # Number of output classes
+  
+# TRAINING CONFIGURATION
+training:
+  batch_size: 64              # Training batch size - yoou might want to increase this if you have enough GPU memory
+                              # Or decrease it if you have memory issues
+
+  learning_rate: 0.00001        # Initial learning rate - should work in most cases, but you can try to decrease it
+  weight_decay: 0.0001          # Weight decay (L2 regularization)
+  epochs: 30                    # Number of epochs to train your model - adjust this based on your wanted training time 
+  optimizer: "adam"             # Options: "adam", "adamw". "adamw" is recommended for most cases"
+  early_stopping_patience: 15   # Early stopping patience - this is the number of epochs without improvement before stopping training
+  device: "cuda"                # Options: "cuda", "cpu", "auto"
+  num_workers: 8                # Number of data loader workers
+
+
+# LOSS CONFIGURATION
+loss:
+  type: "labelsmoothing"                     # Options: "focal", "labelsmoothing", "weighted"
+  label_smoothing: 0.118590893086864         # Label smoothing parameter (0.0-1.0)
+  use_per_class_alpha: true                   # Use per-class weights
+
+  # Focal loss options (when type: "focal"):
+  # focal_alpha: 1.0             # Focal loss alpha parameter
+  # focal_gamma: 2.0             # Focal loss gamma parameter
+
+# WEIGHTS & BIASES CONFIGURATION
+wandb:
+  log_results: false
+  tags: ["production", "efficientnet", "b5", "label_smoothing"]
+  notes: "Production EfficientNet B5 with label smoothing"

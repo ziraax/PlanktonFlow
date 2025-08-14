@@ -9,7 +9,7 @@ parameters:
     values: ["efficientnet"]
 
   efficientnet_variant:
-    values: ['b0', 'b1', 'b2', 'b3', 'b4', 'b5']  # Sweep over different efficient variants
+    values: ['b2', 'b3', 'b4', 'b5']  # Sweep over different efficient variants
   # Loss related parameters
   loss_type:
     values: ["weighted", "focal", "labelsmoothing"]

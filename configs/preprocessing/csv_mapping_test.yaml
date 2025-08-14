@@ -51,7 +51,7 @@ output:
   create_dataset_yaml: true
   
 logging:
-  wandb_enabled: false  # Disable W&B for testing
+  wandb_enabled: true  # Disable W&B for testing
   log_class_distribution: true
-  log_sample_images: false
+  log_sample_images: true
   log_processing_times: true
