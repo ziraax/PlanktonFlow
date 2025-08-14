@@ -1,10 +1,33 @@
-# Deep Learning Training & Inference Pipeline for Automatic Plankton classification
+# PlanktonFlow - an End-to-end Deep Learning Pipeline for Automatic Plankton Classification
 
 ![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red)
 ![W&B Integration](https://img.shields.io/badge/Weights_&_Biases-Integrated-yellow)
 
 An end-to-end deep learning solution supporting multiple model architectures with advanced features for training, evaluation, and production-ready inference.
+
+## Table of Contents
+
+- [Features](#features)
+  - [Preprocessing](#preprocessing)
+  - [Training](#training)
+  - [Inference](#inference)
+- [Installation](#installation)
+- [Usages](#usages)
+  - [To preprocess your data](#to-preprocess-your-data)
+    - [1. Hierarchical Data Format (Folder-based)](#1-hierarchical-data-format-folder-based)
+    - [2. CSV/TSV Mapping Format](#2-csvtsv-mapping-format)
+    - [3. EcoTaxa Format](#3-ecotaxa-format)
+  - [To train a model](#to-train-a-model)
+    - [Basic Training Example](#basic-training-example)
+    - [Advanced Training Features](#advanced-training-features)
+  - [Inference (Making predictions)](#inference-making-predictions)
+  - [Hyperparameter Optimization](#hyperparameter-optimization)
+  - [Quick Start Examples](#quick-start-examples)
+- [Results and monitoring](#results-and-monitoring)
+- [🤝 Contributing](#-contributing)
+- [📚 Citation](#-citation)
+- [📝 License](#-license)
 
 ## Features
 
