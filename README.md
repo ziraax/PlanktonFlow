@@ -8,30 +8,30 @@ An end-to-end deep learning solution supporting multiple model architectures wit
 
 ## Table of Contents
 
-- [Features](#features)
-  - [Preprocessing](#preprocessing)
-  - [Training](#training)
-  - [Inference](#inference)
-- [Installation](#installation)
-- [Usages](#usages)
-  - [To preprocess your data](#to-preprocess-your-data)
-    - [1. Hierarchical Data Format (Folder-based)](#1-hierarchical-data-format-folder-based)
-    - [2. CSV/TSV Mapping Format](#2-csvtsv-mapping-format)
-    - [3. EcoTaxa Format](#3-ecotaxa-format)
-  - [To train a model](#to-train-a-model)
-    - [Basic Training Example](#basic-training-example)
-    - [Advanced Training Features](#advanced-training-features)
-  - [Inference (Making predictions)](#inference-making-predictions)
-  - [Hyperparameter Optimization](#hyperparameter-optimization)
-  - [Quick Start Examples](#quick-start-examples)
-- [Results and monitoring](#results-and-monitoring)
+- [✨ Features](#features)
+  - [🧹 Preprocessing](#preprocessing)
+  - [🏋️ Training](#training)
+  - [🔮 Inference](#inference)
+- [⚙️ Installation](#installation)
+- [🚀 Usages](#usages)
+  - [📂 To preprocess your data](#to-preprocess-your-data)
+    - [1. 🗂 Hierarchical Data Format (Folder-based)](#1-hierarchical-data-format-folder-based)
+    - [2. 📑 CSV/TSV Mapping Format](#2-csvtsv-mapping-format)
+    - [3. 🐚 EcoTaxa Format](#3-ecotaxa-format)
+  - [🏗 To train a model](#to-train-a-model)
+    - [📈 Basic Training Example](#basic-training-example)
+    - [🧠 Advanced Training Features](#advanced-training-features)
+  - [🔍 Inference (Making predictions)](#inference-making-predictions)
+  - [🎯 Hyperparameter Optimization](#hyperparameter-optimization)
+  - [⚡ Quick Start Examples](#quick-start-examples)
+- [📊 Results and monitoring](#results-and-monitoring)
 - [🤝 Contributing](#-contributing)
 - [📚 Citation](#-citation)
 - [📝 License](#-license)
 
-## Features
+## ✨ Features
 
-### Preprocessing 
+### 🧹 Preprocessing 
 Tailored for our dataset — customizable for yours.
 - **Multiple Data Input Format**: Wether your dataset is from EcoTaxa, already organised in classical classification form or using a CSV/TSV file, everything is implemented
 - **Data Augmentation**: Allows to augment the training data to limit the class imbalance issue
@@ -39,7 +39,7 @@ Tailored for our dataset — customizable for yours.
 - **Automatic Data Splitting**: The tool makes preprocessing entirely configurable, with automatic data splitting for training/evaluation and generates automaticly yaml configuration files
 
 
-### Training 
+### 🏋️ Training 
 - **Multi-model Support**: YOLOv11, ResNet, DenseNet, EfficientNet
 - **Advanced Training**:
   - Configurable hyperparameters
@@ -49,14 +49,14 @@ Tailored for our dataset — customizable for yours.
 - **Model Factory Pattern**: Dynamic model creation with variants
 - **Tracking & Integration**: Real-time tracking of metrics, weights, and model versions using either Weights & Biases or our custom module
 
-### Inference 
+### 🔮 Inference 
 - **Batch Processing**: Efficient handling of image directories
 - **Flexible Output**:
   - Top-K predictions
   - CSV export capabilities
 - **Production Ready**: Device-aware execution (CPU/GPU)
 
-## Installation
+## ⚙️ Installation
 
 This installation process covers all steps since this project aims to be used by biologists that could be not familiar with setting up such projects. For more exeperienced users, it follows the general process of setting up a virtual environment, activating it, installing dependencies and running Python scripts. 
 
@@ -146,15 +146,15 @@ wandb login
 Then follow instructions. 
 
 
-## Usages
+## 🚀 Usages
 
 This chapter goes through all the different usages that a user may have with the pipeline. The system is designed around YAML configuration files that make it easy to reproduce experiments and manage different setups.
 
-### To preprocess your data
+### 📂 To preprocess your data
 
 The preprocessing system supports three different data input formats. Choose the configuration that matches your data organization:
 
-#### 1. Hierarchical Data Format (Folder-based)
+#### 1. 📂 Hierarchical Data Format (Folder-based)
 If your data is organized in folders where each folder name represents a class:
 
 ```bash
@@ -216,7 +216,7 @@ logging:
   log_processing_times: true
 ```
 
-#### 2. CSV/TSV Mapping Format
+#### 2. 📑 CSV/TSV Mapping Format
 If you have a CSV/TSV file mapping image paths to class labels:
 
 ```bash
@@ -252,7 +252,7 @@ logging:
   log_processing_times: true
 ```
 
-#### 3. EcoTaxa Format
+#### 3. 🐚 EcoTaxa Format
 For data exported from EcoTaxa platform:
 
 ```bash
@@ -285,7 +285,7 @@ logging:
   log_processing_times: true
 ```
 
-### To train a model
+### 🏗 To train a model
 
 Training is fully configuration-driven. You can train different model architectures with various hyperparameters:
 
@@ -293,7 +293,7 @@ Training is fully configuration-driven. You can train different model architectu
 python3 run_training.py --config configs/training/your_training_config.yaml
 ```
 
-#### Basic Training Example
+#### 📈 Basic Training Example
 
 Example configuration (`configs/training/efficientnet_example.yaml`):
 ```yaml
@@ -347,7 +347,7 @@ wandb:
 
 Training will always compute metrics on the test set at the end. 
 
-#### Advanced Training Features
+#### 🧠 Advanced Training Features
 
 **Multiple Model Architectures:**
 - **EfficientNet**: `variant: "b0"` to `"b7"`
@@ -389,7 +389,7 @@ run_name: "offline_experiment"
 # model_weights/{model_name}/{variant}/{run_name}/
 ```
 
-### Inference (Making predictions)
+### 🔍 Inference (Making predictions)
 
 Use trained models to make predictions on new images:
 
@@ -449,7 +449,7 @@ model:
   weights_path: "path/to/best.pt"       # Path to trained model weights
 ```
 
-### Hyperparameter Optimization
+### 🎯 Hyperparameter Optimization
 
 Perform automated hyperparameter sweeps using Weights & Biases:
 
@@ -503,7 +503,7 @@ parameters:
 3. Results are logged to Weights & Biases for comparison
 4. Best configurations are automatically identified
 
-### Quick Start Examples
+### ⚡ Quick Start Examples
 
 **Complete Workflow Example:**
 ```bash
@@ -517,7 +517,7 @@ python3 run_training.py --config configs/training/efficientnet_production.yaml
 python3 run_inference.py --config configs/inference/production_inference.yaml
 ```
 
-## Results and monitoring 
+## 📊 Results and monitoring 
 
 ### Monitoring 
 
