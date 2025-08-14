@@ -1,3 +1,6 @@
+# /!\ This file is legacy and will be removed in future versions.
+# /!\ It is kept for reference only and should not be used in new implementations.
+
 import argparse
 import copy
 import wandb
@@ -9,7 +12,6 @@ from training.train import train_model
 from models.factory import create_model
 
 from utils.classes import get_num_classes
-from utils.input_size import get_input_size_for_model
 
 
 def parse_args():
@@ -74,7 +76,7 @@ def configure_model(args, config):
         'model_name': args.model_name,
         'model_variant': model_variant,
         'num_classes': get_num_classes(),
-        'img_size': get_input_size_for_model(args.model_name, model_variant, config),
+        'img_size': 224,
     })
 
     return config
@@ -118,7 +120,7 @@ def main():
                 'model_name': model_name,
                 'model_variant': model_variant,
                 'num_classes': get_num_classes(),
-                'img_size': get_input_size_for_model(model_name, model_variant, config),
+                'img_size': 224,
             })
         else:
             # Use CLI arguments (existing logic)

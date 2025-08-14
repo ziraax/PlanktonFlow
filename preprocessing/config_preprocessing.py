@@ -496,10 +496,11 @@ class ConfigPreprocessor:
         # Log to W&B if enabled
         if self.logging_config.get('wandb_enabled', False):
             if self.logging_config.get('log_class_distribution', True):
-                # This would require adapting the existing logging functions
+                # TODO: This would require adapting the existing logging functions
                 print("[INFO] Class distribution logging would be applied here")
                 
             if self.logging_config.get('log_sample_images', True):
+                # TODO: Sample image logging would be applied here
                 print("[INFO] Sample image logging would be applied here")
 
 

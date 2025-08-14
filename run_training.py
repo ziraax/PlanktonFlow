@@ -22,7 +22,7 @@ def parse_args():
         "--config", 
         type=str, 
         required=True,
-        help="Training config name (e.g., efficientnet_b5_production)"
+        help="Path to training config YAML file (e.g., configs/training/efficientnet_b5_production.yaml)"
     )
     parser.add_argument(
         "--dry-run", 
@@ -35,9 +35,22 @@ def parse_args():
 def main():
     args = parse_args()
     
+    # Check if config file exists
+    config_path = Path(args.config)
+    if not config_path.exists():
+        print(f"[ERROR] Config file '{args.config}' not found.")
+        print(f"[ERROR] Please provide a valid path to a training configuration file.")
+        print(f"[ERROR] Example: --config configs/training/efficientnet_b5_production.yaml")
+        sys.exit(1)
+    
     # Load configuration using ConfigManager
     config_manager = ConfigManager()
-    config = config_manager.get_training_config(args.config)
+    config = config_manager.load_config(args.config)
+    
+    if not config:
+        print(f"[ERROR] Failed to load config from '{args.config}'")
+        print(f"[ERROR] Please check the file format and content.")
+        sys.exit(1)
     
     print("=" * 60)
     print("TRAINING CONFIGURATION SUMMARY")
@@ -47,13 +60,31 @@ def main():
     print(f"Pretrained: {config.get('model', {}).get('pretrained', True)}")
     print(f"Freeze Backbone: {config.get('model', {}).get('freeze_backbone', False)}")
     print(f"Batch Size: {config.get('training', {}).get('batch_size', config.get('batch_size', 32))}")
-    print(f"Learning Rate: {config.get('training', {}).get('learning_rate', config.get('learning_rate', 0.001))}")
+    
+    # Show learning rate in original format
+    lr = config.get('training', {}).get('learning_rate', config.get('learning_rate', 0.001))
+    print(f"Learning Rate: {lr}")
+    
     print(f"Epochs: {config.get('training', {}).get('epochs', config.get('epochs', 50))}")
     print(f"Optimizer: {config.get('training', {}).get('optimizer', config.get('optimizer', 'adamw'))}")
-    print(f"Loss Type: {config.get('loss', {}).get('type', config.get('loss_type', 'focal'))}")
+    
+    # Show loss configuration details
+    loss_type = config.get('loss', {}).get('type', config.get('loss_type', 'focal'))
+    print(f"Loss Type: {loss_type}")
+    
+    # Show loss-specific parameters
+    if loss_type == 'labelsmoothing':
+        ls_epsilon = config.get('loss', {}).get('label_smoothing', 0.1)
+        print(f"Label Smoothing Epsilon: {ls_epsilon}")
+    elif loss_type == 'focal':
+        focal_gamma = config.get('loss', {}).get('focal_gamma', 2.0)
+        focal_alpha = config.get('loss', {}).get('focal_alpha', 1.0)
+        print(f"Focal Gamma: {focal_gamma}")
+        print(f"Focal Alpha: {focal_alpha}")
+    
     print(f"Dataset Path: {config.get('data', {}).get('dataset_path', config.get('final_dataset_path', 'DATA/final_dataset'))}")
     print(f"Input Size: {config.get('model', {}).get('input_size', config.get('img_size', 224))}")
-    print(f"Device: {config.get('device', 'cuda')}")
+    print(f"Device: {config.get('training', {}).get('device', config.get('device', 'cuda'))}")
     print("=" * 60)
     
     if args.dry_run:
@@ -77,7 +108,7 @@ def main():
     print(f"[INFO] Starting training with config: {args.config}")
     
     # Train the model
-    train_model(model, normalized_config)
+    train_model(model, normalized_config, training_config_name=args.config)
     
     print("[SUCCESS] Training completed!")
 
@@ -128,6 +159,10 @@ def normalize_config_for_training(config):
         normalized['loss_type'] = loss_config.get('type', 'focal')
         normalized['focal_gamma'] = loss_config.get('focal_gamma', 2.0)
         normalized['use_per_class_alpha'] = loss_config.get('use_per_class_alpha', True)
+        
+        # Map label_smoothing to labelsmoothing_epsilon for compatibility
+        if 'label_smoothing' in loss_config:
+            normalized['labelsmoothing_epsilon'] = loss_config['label_smoothing']
     
     # Extract nested wandb config
     if 'wandb' in config:

@@ -14,7 +14,6 @@ from models.factory import create_model
 from training.loss import FocalLoss, WeightedLoss, LabelSmoothingLoss
 from utils.classes import get_class_weights
 from config import DEFAULT_CONFIG
-from utils.input_size import get_input_size_for_model
 from training.early_stopping import EarlyStopping
 from utils.config_manager import config_manager
 
@@ -50,8 +49,8 @@ def _setup_training_environment(config):
     Loads from config file if specified, otherwise uses the existing fallback system.
     """
     if 'img_size' not in config:
-        print(f"[WARNING] 'img_size' not found in config. Using default input size for model: {config['model_name']}")
-        config['img_size'] = get_input_size_for_model(config, config['model_name'], config.get('model_variant', 'Default-cls'))
+        print(f"[WARNING] 'img_size' not found in config. Using standard 224x224 input size for all models.")
+        config['img_size'] = 224
     
     if 'num_classes' not in config:
         print(f"[WARNING] 'num_classes' not found in config. Using class weights to determine number of classes.")
@@ -173,38 +172,10 @@ def train_model(model, config, training_config_name=None):
         config: Base configuration (from main.py)
         training_config_name: Optional name of training config file to load
     """
-    # Load training config if specified
+    # Config is already loaded and normalized by run_training.py
+    # Just ensure the _config_loaded flag is set
     if training_config_name:
-        print(f"[INFO] Loading training configuration: {training_config_name}")
-        training_config = config_manager.get_training_config(training_config_name)
-        
-        # Override model parameters from config file
-        if 'model' in training_config:
-            model_cfg = training_config['model']
-            config.update({
-                'model_name': model_cfg.get('name', config.get('model_name')),
-                'model_variant': model_cfg.get('variant', config.get('model_variant')),
-                'pretrained': model_cfg.get('pretrained', True),
-                'freeze_backbone': model_cfg.get('freeze_backbone', False)
-            })
-        
-        # Override training parameters
-        if 'training' in training_config:
-            config.update(training_config['training'])
-            
-        # Override loss parameters  
-        if 'loss' in training_config:
-            loss_config = training_config['loss'].copy()
-            
-            # Map 'type' to 'loss_type' for backward compatibility
-            if 'type' in loss_config:
-                loss_config['loss_type'] = loss_config.pop('type')
-                
-            config.update(loss_config)
-            
         print(f"[INFO] Training config loaded: {training_config_name}")
-        
-        # Set flag to indicate config was loaded to prevent defaults override
         config['_config_loaded'] = True
     else:
         print(f"[INFO] Using fallback defaults for training configuration")

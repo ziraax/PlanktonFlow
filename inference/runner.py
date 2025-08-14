@@ -19,7 +19,6 @@ from inference.dataset import InferenceDataset
 from models.factory import create_model
 from inference.utils import topk_predictions
 from utils.classes import get_classes_names
-from utils.input_size import get_input_size_for_model
 
 
 def run_inference(args, config):
@@ -35,7 +34,7 @@ def run_inference(args, config):
         - Batch inference for multiple images.
     """
 
-    # We want to store the preprocessed images in a temp dire that will be cleaned up after inference
+    # We want to store the preprocessed images in a temp dir that will be cleaned up after inference
     with tempfile.TemporaryDirectory(prefix="inference_processed_") as temp_dir:
         
         orig_image_paths = [os.path.join(args.image_dir, f) for f in os.listdir(args.image_dir)
@@ -45,22 +44,35 @@ def run_inference(args, config):
 
         print(f"[INFO] Temp folder is located at: {temp_processed_dir}")
 
-        scalebar_model = YOLO(config['scalebar_model_path'])
-        scalebar_model.conf = config['scalebar_confidence']
+        # Check if scalebar removal is enabled in config
+        scalebar_enabled = config.get('preprocessing', {}).get('scalebar_removal', False)
+        
+        if scalebar_enabled:
+            print("[INFO] Scalebar removal enabled - preprocessing images")
+            scalebar_model = YOLO(config['scalebar_model_path'])
+            scalebar_model.conf = config['scalebar_confidence']
+        else:
+            print("[INFO] Scalebar removal disabled - using original images")
+            scalebar_model = None
 
         processed_to_original = {}
         processed_image_paths = []
         for orig_path in orig_image_paths:
-            process_image(orig_path, temp_processed_dir, scalebar_model)
-
-            with open(orig_path, 'rb') as f:
-                file_hash = hashlib.md5(f.read()).hexdigest()[:8]
-            processed_path = temp_processed_dir / f"{Path(orig_path).stem}_{file_hash}.jpg"
-            if processed_path.exists():
-                processed_image_paths.append(str(processed_path))
-                processed_to_original[str(processed_path)] = orig_path
+            if scalebar_enabled:
+                # Process with scalebar removal
+                process_image(orig_path, temp_processed_dir, scalebar_model)
+                with open(orig_path, 'rb') as f:
+                    file_hash = hashlib.md5(f.read()).hexdigest()[:8]
+                processed_path = temp_processed_dir / f"{Path(orig_path).stem}_{file_hash}.jpg"
+                if processed_path.exists():
+                    processed_image_paths.append(str(processed_path))
+                    processed_to_original[str(processed_path)] = orig_path
+                else:
+                    print(f"[WARNING] Processed image not found: {processed_path}. Skipping this image.")
             else:
-                print(f"[WARNING] Processed image not found: {processed_path}. Skipping this image.")
+                # Use original image without processing
+                processed_image_paths.append(orig_path)
+                processed_to_original[orig_path] = orig_path
 
         
         image_paths = processed_image_paths
@@ -81,7 +93,9 @@ def run_inference(args, config):
         else:
             variant = "Default-cls"
 
+        # Use consistent 224x224 input size for all models
         img_size = 224
+        print(f"[INFO] Using input size: {img_size}x{img_size} for {args.model_name} {variant}")
         all_results = []
 
         if args.model_name == "yolov11":
