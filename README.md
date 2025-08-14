@@ -159,8 +159,8 @@ preprocessing:
     mode: "RGB"
   
   image_filtering:
-    min_images_per_class: 10
-    max_images_per_class: null
+    min_images_per_class: 100
+    max_images_per_class: 4000
     skip_corrupted_images: true
   
   data_splitting:
@@ -172,8 +172,8 @@ preprocessing:
   
   augmentation:
     enabled: true
-    target_images_per_class: 100
-    max_copies_per_image: 5
+    target_images_per_class: 1500
+    max_copies_per_image: 10
     techniques:
       horizontal_flip: 0.5
       vertical_flip: 0.2
@@ -188,8 +188,8 @@ output:
   create_dataset_yaml: true
   
 logging:
-  wandb_enabled: false
-  log_class_distribution: true
+  wandb_enabled: false   # In most cases, you don't need WandB logging at the preprocessing step
+  log_class_distribution: true  
   log_sample_images: false
   log_processing_times: true
 ```
@@ -214,38 +214,8 @@ input_source:
   image_path_prefix: ""
 
 preprocessing:
-  scalebar_removal:
-    enabled: true
-    model_path: "models/model_weights/scale_bar_remover/best.pt"
-    confidence: 0.4
-    img_size: 416
-  
-  grayscale_conversion:
-    enabled: true
-    mode: "RGB"
-  
-  image_filtering:
-    min_images_per_class: 10
-    max_images_per_class: null
-    skip_corrupted_images: true
-  
-  data_splitting:
-    train_ratio: 0.7
-    val_ratio: 0.2
-    test_ratio: 0.1
-    stratified: true
-    random_seed: 42
-  
-  augmentation:
-    enabled: true
-    target_images_per_class: 100
-    max_copies_per_image: 5
-    techniques:
-      horizontal_flip: 0.5
-      vertical_flip: 0.2
-      rotate_90: 0.3
-      brightness_contrast: 0.4
-      hue_saturation: 0.3
+  # Same preprocessing parameters over all configs 
+ [...]
       
 output:
   base_path: "DATA/your_dataset"
@@ -277,39 +247,9 @@ input_source:
   separator: "\t"
 
 preprocessing:
-  scalebar_removal:
-    enabled: true  
-    model_path: "models/model_weights/scale_bar_remover/best.pt"
-    confidence: 0.4
-    img_size: 416
-  
-  grayscale_conversion:
-    enabled: false  # Usually not needed for EcoTaxa images
-    mode: "RGB"
-  
-  image_filtering:
-    min_images_per_class: 10  # Minimum samples per class
-    max_images_per_class: null
-    skip_corrupted_images: true
-  
-  data_splitting:
-    train_ratio: 0.7
-    val_ratio: 0.2
-    test_ratio: 0.1
-    stratified: true  # Can be disabled if classes are too imbalanced
-    random_seed: 42
-  
-  augmentation:
-    enabled: true
-    target_images_per_class: 100
-    max_copies_per_image: 3
-    techniques:
-      horizontal_flip: 0.5
-      vertical_flip: 0.2
-      rotate_90: 0.3
-      brightness_contrast: 0.4
-      hue_saturation: 0.3
-      
+  # Same preprocessing parameters over all configs 
+  [...]
+
 output:
   base_path: "DATA/your_ecotaxa"
   processed_path: "DATA/your_ecotaxa_processed"
@@ -339,7 +279,7 @@ Example configuration (`configs/training/efficientnet_example.yaml`):
 # EfficientNet B5 Training Configuration
 # ============================================================
 
-run_name: "efficientnet_b5_experiment"  # Custom run name
+run_name: "efficientnet_b5_experiment"  # Custom run name in case you don't want it to be generated
 
 # DATA CONFIGURATION
 data:
@@ -362,7 +302,7 @@ model:
 training:
   batch_size: 32               # Training batch size
   learning_rate: 0.001         # Initial learning rate
-  weight_decay: 0.01           # Weight decay (L2 regularization)
+  weight_decay: 0.01           # Weight decay (L2 regularization) 
   epochs: 50                   # Number of training epochs
   optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
   early_stopping_patience: 15  # Early stopping patience
@@ -371,7 +311,7 @@ training:
 
 # LOSS CONFIGURATION
 loss:
-  type: "focal"                # Options: "focal", "labelsmoothing", "weighted", "crossentropy"
+  type: "focal"                # Options: "focal", "labelsmoothing", "weighted"
   focal_alpha: 1.0             # Focal loss alpha parameter
   focal_gamma: 2.0             # Focal loss gamma parameter
   use_per_class_alpha: true    # Use per-class weights
@@ -403,7 +343,7 @@ loss:
 # Label Smoothing
 loss:
   type: "labelsmoothing"
-  labelsmoothing_epsilon: 0.1
+  labelsmoothing_epsilon: 0.12
 
 # Weighted Cross-Entropy (automatic class balancing)
 loss:
@@ -416,8 +356,8 @@ loss:
 # Disable W&B for offline training
 wandb:
   log_results: false
-  tags: ["offline", "test"]
-  notes: "Local training without W&B"
+  tags: ["production", "efficientnet", "b5", "label_smoothing"]
+  notes: "Production EfficientNet B5 with label smoothing"
 
 run_name: "offline_experiment"
 

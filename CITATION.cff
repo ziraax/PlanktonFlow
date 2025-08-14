@@ -9,5 +9,5 @@ doi: ""
 date-released: 2025-08-01
 doi: "" # optional, if you have a Zenodo DOI
 license: "MIT"
-repository-code: "https://github.com/ziraax/TaxoNet"
-url: "https://github.com/ziraax/TaxoNet"
+repository-code: "https://github.com/ziraax/PlanktonFlow.git"
+url: "https://github.com/ziraax/PlanktonFlow"
