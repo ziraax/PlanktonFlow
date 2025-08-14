@@ -54,7 +54,6 @@ Tailored for our dataset — customizable for yours.
 - **Flexible Output**:
   - Top-K predictions
   - CSV export capabilities
-  - 
 - **Production Ready**: Device-aware execution (CPU/GPU)
 
 ## Installation
@@ -346,6 +345,8 @@ wandb:
   notes: "Production training run"
 ```
 
+Training will always compute metrics on the test set at the end. 
+
 #### Advanced Training Features
 
 **Multiple Model Architectures:**
@@ -518,7 +519,56 @@ python3 run_inference.py --config configs/inference/production_inference.yaml
 
 ## Results and monitoring 
 
-TODO
+### Monitoring 
+
+If you chose to not use Weights and Biases, our custom monitoring module will gather informations while training and write them in a file in the same time so you can monitor your runs. 
+
+The file will be located at `model_weights/{model_name}/{variant}/{run_name}/training_log.txt` and will look like this : 
+
+```yaml
+Training Log - Reproduce_best_model_20250814_141638
+============================================================
+Model: efficientnet b5
+Dataset: DATA/final_dataset
+Batch Size: 64
+Learning Rate: 1e-5
+Loss Type: labelsmoothing
+Started: 2025-08-14 14:16:39
+============================================================
+Epoch | Train Loss | Val Loss | Top-1 Acc | Top-5 Acc | F1 Macro | Recall Macro | Precision Macro | LR
+--------------------------------------------------------------------------------
+    1 |     2.7936 |   1.6791 |    0.7390 |    0.9518 |   0.6957 |       0.7385 |       0.7072 | 1.00e-05
+    2 |     1.5423 |   1.3701 |    0.8247 |    0.9806 |   0.7969 |       0.8204 |       0.7892 | 1.00e-05
+    3 |     1.3472 |   1.2886 |    0.8498 |    0.9877 |   0.8246 |       0.8387 |       0.8202 | 9.99e-06
+    4 |     1.2635 |   1.2551 |    0.8603 |    0.9892 |   0.8375 |       0.8534 |       0.8298 | 9.98e-06
+```
+
+This data is also saved in the `training_log.csv` so you can later analyze your runs. 
+
+
+### Results
+
+A notebook named `results_analysis.ipynb` is available to further analyze training metrics and inference results.
+To adapt it to your own runs, modify the first cell as follows: 
+
+```python
+# Replace with your model path
+MODEL_DIR = "model_weights/{model_name}/{variant}/{run_name}"
+TRAINING_LOG_PATH = f"{MODEL_DIR}/training_log.csv"
+CLASSIF_REPORT = f"{MODEL_DIR}/classification_report.csv"
+```
+
+Once updated, click on Run All to generate figures and insights about your classification model and training process, including:
+
+- Validation & training loss over epochs
+- Evolution of accuracies over epochs
+- Metrics over epochs
+- F1-score vs. support
+- Best and worst classified classes
+- Confusion matrix
+- Most frequently confused classes
+
+This is a starter kit to evaluate your model, which can be easily extended for more advanced analyses.
 
 ## 🤝 Contributing
 
