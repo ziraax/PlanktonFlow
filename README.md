@@ -521,9 +521,11 @@ python3 run_inference.py --config configs/inference/production_inference.yaml
 
 ### Monitoring 
 
-If you chose to not use Weights and Biases, our custom monitoring module will gather informations while training and write them in a file in the same time so you can monitor your runs. 
+If you choose not to use Weights & Biases, our custom monitoring module will collect training data and write it to a log file in real time, allowing you to monitor your runs as they progress.
 
-The file will be located at `model_weights/{model_name}/{variant}/{run_name}/training_log.txt` and will look like this : 
+The file will be saved at: `model_weights/{model_name}/{variant}/{run_name}/training_log.txt`. 
+
+Example: 
 
 ```yaml
 Training Log - Reproduce_best_model_20250814_141638
@@ -536,15 +538,14 @@ Loss Type: labelsmoothing
 Started: 2025-08-14 14:16:39
 ============================================================
 Epoch | Train Loss | Val Loss | Top-1 Acc | Top-5 Acc | F1 Macro | Recall Macro | Precision Macro | LR
---------------------------------------------------------------------------------
-    1 |     2.7936 |   1.6791 |    0.7390 |    0.9518 |   0.6957 |       0.7385 |       0.7072 | 1.00e-05
-    2 |     1.5423 |   1.3701 |    0.8247 |    0.9806 |   0.7969 |       0.8204 |       0.7892 | 1.00e-05
-    3 |     1.3472 |   1.2886 |    0.8498 |    0.9877 |   0.8246 |       0.8387 |       0.8202 | 9.99e-06
-    4 |     1.2635 |   1.2551 |    0.8603 |    0.9892 |   0.8375 |       0.8534 |       0.8298 | 9.98e-06
+---------------------------------------------------------------------------------------------------------
+    1 |     2.7936 |   1.6791 |    0.7390 |    0.9518 |   0.6957 |       0.7385 |          0.7072 | 1.00e-05
+    2 |     1.5423 |   1.3701 |    0.8247 |    0.9806 |   0.7969 |       0.8204 |          0.7892 | 1.00e-05
+    3 |     1.3472 |   1.2886 |    0.8498 |    0.9877 |   0.8246 |       0.8387 |          0.8202 | 9.99e-06
+    4 |     1.2635 |   1.2551 |    0.8603 |    0.9892 |   0.8375 |       0.8534 |          0.8298 | 9.98e-06
 ```
 
-This data is also saved in the `training_log.csv` so you can later analyze your runs. 
-
+This same data is also stored in `training_log.csv` for further analysis.
 
 ### Results
 
