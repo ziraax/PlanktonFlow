@@ -210,7 +210,7 @@ def train_model(model, config, training_config_name=None):
     if config["model_name"] == "yolov11":
         model = create_model('yolov11')
         model_path = model.train(run, config)
-        evaluate_yolo_model(model_path, config['final_dataset_path'], run_name, config, run=run, run_name=run_name)
+        evaluate_yolo_model(model_path, config['final_dataset_path'], config['run_name'], config, run=run)
         return
     
     model.to(device)

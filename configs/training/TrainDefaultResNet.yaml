@@ -1,50 +1,94 @@
 # ============================================================
-# ResNet 152 Production Configuration with ALL OPTIONS
+# 🏗️ ResNet 152 Training Configuration - BEGINNER FRIENDLY
 # ============================================================
 
-# This configuration file is designed to train a ResNet 152 Model 
-# Its a good starting point for your experimentations, but feel free to modify it. 
+# 📖 WHAT IS ResNet?
+# ResNet (Residual Network) is a powerful neural network architecture that's excellent for image classification.
+# ResNet 152 means it has 152 layers deep, making it very capable but also requiring more computational resources.
+# It's known for being stable and reliable, though slower than EfficientNet or YOLOv11.
 
-run_name: "Reproduce_Best_ResNet"  # Custom run name for testing
+# 🏷️ TRAINING RUN IDENTIFICATION  
+run_name: "ResNet_Default_Config_Run_{attributes}"  # Name for this training session
 
-
-# DATA CONFIGURATION
+# 📂 DATA CONFIGURATION
 data:
-  dataset_path: "DATA/final_dataset"  # Path to dataset.yaml
-  
-# PROJECT CONFIGURATION
+  # ⚠️ IMPORTANT: Point to your preprocessed dataset folder
+  dataset_path: "DATA/YourOwnDataset_final_dataset"  
+
+# 📊 PROJECT TRACKING
 project:
-  name: "YourWandBProjectName"     # W&B project name
+  name: "YourWandBProjectName"     # Weights & Biases project name
 
-# MODEL CONFIGURATION
+# 🤖 MODEL CONFIGURATION
 model:
-  name: "resnet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
-  variant: "152"             
-  pretrained: true          # Use pretrained weights
-  freeze_backbone: false    # Freeze backbone layers
-  input_size: 224           # Input image size (224, 256, 384, etc.)
-  num_classes: 76           # Number of output classes
+  name: "resnet"                # 🏗️ Use ResNet architecture
+                                # ResNet is stable, reliable, and works well for most image types
+                                
+  variant: "152"                # 📏 ResNet depth/complexity
+                                # Options: "18" (fastest), "34", "50", "101", "152" (most accurate)
+                                # 152 = deepest and most accurate but slowest
+                                # For beginners: try "50" first (good balance of speed/accuracy)
+                                
+  pretrained: true              # 🔥 Start with ImageNet pre-trained weights (HIGHLY RECOMMENDED)
+                                # Gives much better results and faster training
+                                
+  freeze_backbone: false        # 🧊 Train all layers vs. just the final classifier
+                                # false = train entire network (RECOMMENDED)
+                                
+  input_size: 224               # 📐 Input image size (224x224 pixels)
+                                
+  num_classes: 5                # 📊 Number of species in your dataset
+                                # MUST match your actual data!
 
-
-# TRAINING CONFIGURATION
+# 🏋️ TRAINING CONFIGURATION
 training:
-  batch_size: 64               # Training batch size
-  learning_rate: 0.000001        # Initial learning rate
-  weight_decay: 0.0000005           # Weight decay (L2 regularization)
-  epochs: 30                    # Maximum number of epochs
-  optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
-  early_stopping_patience: 15  # Early stopping patience
-  device: "cuda"               # Options: "cuda", "cpu", "auto"
-  num_workers: 8               # Number of data loader workers
+  batch_size: 64                # 🔢 Images processed together
+                                # ResNet 152 uses more memory than smaller models
+                                # If you get memory errors, try: 32, 16, or 8
+                                
+  learning_rate: 0.000001       # 📈 How fast the model learns
+                                # Very small for ResNet 152 to ensure stable training
+                                # This deep model needs careful, slow learning
+                                
+  weight_decay: 0.0000005       # 🛡️ Regularization (prevents overfitting)
+                                # Small value for this large model
+                                
+  epochs: 10                    # 🔄 Training iterations through dataset
+                                # Start small (10) for testing, increase (20-50) for production
+                                
+  optimizer: "adamw"            # 🎯 Weight update algorithm
+                                # "adamw" often works better than "adam" for ResNet
+                                
+  early_stopping_patience: 15   # ⏹️ Stop if no improvement for 15 epochs
+                                
+  device: "cuda"                # 💻 Use GPU (essential for ResNet 152!)
+                                
+  num_workers: 8                # 👥 Parallel data loading processes
 
-# LOSS CONFIGURATION
+# 📉 LOSS FUNCTION CONFIGURATION
 loss:
-  type: "labelsmoothing"       # Options: "focal", "labelsmoothing", "weighted"
-  label_smoothing: 0.05133367510889371         # Label smoothing parameter (0.0-1.0)
-  use_per_class_alpha: true    # Use per-class weights
+  type: "labelsmoothing"        # 🎯 Use label smoothing loss
+                                # Good for preventing overconfidence in deep models like ResNet 152
+                                
+  label_smoothing: 0.05133367510889371  # 🎚️ Smoothing amount
+                                        # This value was optimized for ResNet on similar data
+                                        
+  use_per_class_alpha: true     # ⚖️ Handle class imbalance automatically
 
-# WEIGHTS & BIASES CONFIGURATION
+# 📊 EXPERIMENT TRACKING
 wandb:
-  log_results: false
-  tags: ["reproduce", "resnet", "152"]
-  notes: "Reproduce Best ResNet 152"
+  log_results: false            # 📈 Weights & Biases logging
+  tags: ["resnet", "152", "deep_learning"]
+  notes: "ResNet 152 training - powerful but resource-intensive model"
+
+# ⚠️ RESNET 152 SPECIFIC WARNINGS:
+# 1. 🐌 SLOW: ResNet 152 is much slower than EfficientNet or YOLOv11
+# 2. 💾 MEMORY: Needs lots of GPU memory - reduce batch_size if needed  
+# 3. ⏰ TIME: Training takes longer - be patient!
+# 4. 🎯 ACCURACY: Often very accurate once trained properly
+
+# 💡 BEGINNER RECOMMENDATIONS:
+# - Try ResNet 50 first (change variant: "50") - it's much faster
+# - Start with small epochs (10) to test if everything works
+# - Monitor GPU memory usage - ResNet 152 is demanding
+# - Consider EfficientNet B5 or YOLOv11 for faster alternatives

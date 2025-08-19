@@ -1,24 +1,87 @@
-# CSV-Trained EfficientNet B5 Inference Configuration
-# Using the model trained on CSV dataset with 5 classes
+# ============================================================
+# 🔮 MODEL INFERENCE CONFIGURATION - BEGINNER FRIENDLY
+# ============================================================
+
+# 📖 WHAT IS INFERENCE?
+# Inference means using your trained model to make predictions on new, unseen images.
+# After training a model, you use this config to classify new images and get species predictions.
+
+# 🤖 MODEL CONFIGURATION (which trained model to use)
 model:
-  name: "efficientnet" # Or densenet, resnet, yolov11
-  variant: "b5" # Model variant 
-  weights_path: "path/to/your/model/weights"
-  num_classes: 5  # Number of classes 
+  name: "densenet"              # 🧠 Type of model architecture
+                                # Options: "efficientnet", "resnet", "densenet", "yolov11"
+                                # This MUST match the type you used for training
+                                
+  variant: "161"                # 📏 Model size/variant
+                                # Must match what you used during training
+                                # EfficientNet: b0-b7, ResNet: 18,34,50,101,152, DenseNet: 121,161,169,201
+                                
+  weights_path: "model_weights/densenet/161/DenseNet_Default_Config_Run_CARO_20250818_144738/best.pt"
+                                # 📁 Path to your trained model file
+                                # ⚠️ IMPORTANT: Change this to YOUR model's path!
+                                # Look in model_weights/[model_name]/[variant]/[your_run_name]/best.pt
+                                
+  num_classes: 5                # 📊 Number of classes the model was trained on
+                                # This MUST match your training dataset
+                                # Check your training logs or dataset.yaml to confirm this number
 
+# 🔍 INFERENCE SETTINGS (how to run predictions)
 inference:
-  image_dir: "path/to/your/inference/images" # Directory containing images for inference
-  batch_size: 64 # Batch size for inference, your might need to adjust this based on your GPU memory
-  top_k: 5 # Number of top predictions to return
-  device: "cuda" # Device to run inference on, options: "cuda", "cpu", "auto"
-  save_csv: true # Save results to CSV
-  output_path: "outputs/saved_results.csv" # Path to save the inference results CSV
+  image_dir: "DATA/ecotaxa_infer_set"  # 📂 Folder containing images to classify
+                                       # Point this to your new images (not training data!)
+                                       # All .jpg, .jpeg, .png files in this folder will be processed
+                                       
+  batch_size: 32                # 🔢 Number of images processed at once
+                                # Larger = faster but uses more GPU memory
+                                # If you get "out of memory" errors, try 16, 8, or 4
+                                # If you have lots of GPU memory, try 64 or 128
+                                
+  top_k: 5                      # 🎯 Number of top predictions to return per image
+                                # 5 = show top 5 most likely species with confidence scores
+                                # Useful to see alternative predictions, not just the best one
+                                
+  device: "cuda"                # 💻 Where to run inference
+                                # "cuda" = use GPU (MUCH faster, recommended)
+                                # "cpu" = use CPU (slower but works without GPU)
+                                
+  save_csv: true                # 💾 Save results to a CSV file
+                                # true = create spreadsheet with all predictions (RECOMMENDED)
+                                # false = only show results in terminal
+                                
+  output_path: "outputs/results_caro.csv"  # 📄 Where to save the CSV results file
+                                           # Change "results_caro.csv" to your preferred filename
+                                           # Will contain: image_path, top predictions, confidence scores
 
-# Optional preprocessing during inference
+# 🔧 OPTIONAL PREPROCESSING (clean images before prediction)
 preprocessing:
-  scalebar_removal: true # If you want to remove scalebars before inference, set this to true, e.g if your images contain scalebars
+  scalebar_removal: true        # 🔍 Remove scale bars from images before classification
+                                # true = detect and remove scale bars (RECOMMENDED for microscopy)
+                                # false = use images as-is
+                                # Should match what you used during training data preprocessing
   
+# 📊 EXPERIMENT TRACKING (Weights & Biases)
 wandb:
-  log_results: false  # Whether or not you want to log results to Weights & Biases
-  tags: ["inference", "csv_dataset"]
-  notes: "Inference with custom model (5 classes)"
+  log_results: true             # 📈 Upload results to Weights & Biases
+                                # true = see results online with charts and images
+                                # false = keep results local only
+                                
+  tags: ["inference", "production", "classification"]  # 🏷️ Organize your inference runs
+  
+  notes: "Inference run on new dataset using trained DenseNet model"  # 📝 Description
+
+# 💡 BEGINNER TIPS:
+# 1. Make sure weights_path points to a model trained on similar data
+# 2. Ensure num_classes matches your training (check training logs or dataset.yaml)
+# 3. Start with a small batch of test images first
+# 4. Check the CSV output to understand prediction confidence scores
+# 5. Low confidence scores (< 0.5) might indicate the model is uncertain
+
+# 📊 UNDERSTANDING RESULTS:
+# The CSV output will show:
+# - image_path: name of each image
+# - top1_label, top1_score: most likely species and confidence (0-1)
+# - top2_label, top2_score: second most likely species and confidence
+# - etc. for top_k predictions
+# 
+# Confidence scores closer to 1.0 = model is very confident
+# Scores closer to 0.0 = model is uncertain (might be unusual image)

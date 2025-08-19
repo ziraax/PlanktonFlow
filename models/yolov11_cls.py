@@ -38,11 +38,11 @@ class YOLOv11Classifier:
                 patience=config['early_stopping_patience'],
                 save_period=1,
                 project=config['project_name'],
-                name=run.name,
+                name=config['run_name'],
             )
             # Save the model
             weights_src = os.path.join(results.save_dir, "weights", "best.pt")
-            weights_dst = os.path.join("model_weights", config['model_name'], config['model_variant'], run.name, "best.pt")
+            weights_dst = os.path.join("model_weights", config['model_name'], config['model_variant'], config['run_name'], "best.pt")
             os.makedirs(os.path.dirname(weights_dst), exist_ok=True)
             shutil.copy2(weights_src, weights_dst)
 

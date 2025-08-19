@@ -1,29 +1,69 @@
 # ============================================================
-# YOLOv11 Default-cls Production Configuration with ALL OPTIONS
+# 🎯 YOLOv11 Training Configuration - BEGINNER FRIENDLY
 # ============================================================
 
-run_name: "Reproduce_Best_YOLOv11"  # Custom run name for testing
+# 📖 WHAT IS YOLOv11?
+# YOLOv11 is a modern, fast, and accurate neural network originally designed for object detection
+# but also works very well for image classification (like identifying plankton species).
+# It's often faster than EfficientNet while maintaining good accuracy.
 
+# 🏷️ TRAINING RUN IDENTIFICATION
+run_name: "YOLOv11_Default_Training_Run"  # Name to identify this training session
 
-# DATA CONFIGURATION
+# 📂 DATA CONFIGURATION
 data:
-  dataset_path: "DATA/final_dataset"  # Path to dataset.yaml
-  
-# PROJECT CONFIGURATION
+  # ⚠️ IMPORTANT: Point this to your final preprocessed dataset
+  # Should contain train/, val/, test/ folders and a dataset.yaml file
+  dataset_path: "DATA/sample_hierarchical_final_dataset"  
+
+# 📊 PROJECT TRACKING (Weights & Biases)
 project:
-  name: "YourWandBProjectName"     # W&B project name
+  name: "YourWandBProjectName"     # Your experiment tracking project name
 
-# MODEL CONFIGURATION
+# 🤖 MODEL CONFIGURATION
 model:
-  name: "yolov11"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
-  variant: "Default-cls"             
-  pretrained: true          # Use pretrained weights
-  freeze_backbone: false    # Freeze backbone layers
-  input_size: 224           # Input image size (224, 256, 384, etc.)
-  num_classes: 76           # Number of output classes
+  name: "yolov11"           # 🎯 Use YOLOv11 architecture
+                            # YOLOv11 is modern, fast, and accurate for classification
+                            # Excellent choice for real-time applications
+  variant: "Default-cls"   
+                            
+  pretrained: true          # 🔥 Start with pre-trained weights (HIGHLY RECOMMENDED)
+                            # true = much faster training and better results
+                            # false = train from scratch (not recommended for beginners)
+                            
+  freeze_backbone: false    # 🧊 Whether to freeze feature extraction layers
+                            # false = train entire model (RECOMMENDED)
+                            # true = only train final classification layer
+                            
+  input_size: 224           # 📐 Input image size (224x224 pixels)
+                            # All images will be resized to this size
+                            
+  num_classes: 76           # 📊 Number of species/classes in your dataset
+                            # MUST match the number of classes in your data
 
-# WEIGHTS & BIASES CONFIGURATION
+# 📊 TRAINING BEHAVIOR
+# YOLOv11 has built-in smart training settings, so we don't need to configure
+# learning rates, optimizers, etc. manually - it handles this automatically!
+
+# 📈 WEIGHTS & BIASES CONFIGURATION (Experiment Tracking)
 wandb:
-  log_results: false
-  tags: ["reproduce", "yolov11", "Default-cls"]
-  notes: "Reproduce YOLOv11 Default-cls"
+  log_results: true         # 📊 Upload training progress to Weights & Biases
+                            # true = see charts and progress online (recommended)
+                            # false = save results locally only
+                            
+  tags: ["yolov11", "classification", "beginner_friendly"]  # 🏷️ Organize your experiments
+  
+  notes: "YOLOv11 training with default settings - great for beginners!"  # 📝 Experiment description
+
+# 💡 YOLO ADVANTAGES FOR BEGINNERS:
+# ✅ Automatic hyperparameter tuning - no need to guess learning rates!
+# ✅ Built-in data augmentation - improves model robustness
+# ✅ Fast training and inference - good for quick experiments
+# ✅ Excellent accuracy - often matches or beats other architectures
+# ✅ Simple configuration - fewer parameters to worry about
+
+# 🚀 GETTING STARTED:
+# 1. Make sure your dataset_path points to your preprocessed data
+# 2. Set num_classes to match your actual number of species
+# 3. Run: python3 run_training.py --config configs/training/TrainDefaultYolo.yaml
+# 4. Watch the training progress in your terminal or on Weights & Biases!

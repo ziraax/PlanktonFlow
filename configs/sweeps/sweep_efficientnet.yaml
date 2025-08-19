@@ -1,51 +1,119 @@
-method: bayes  
+# ============================================================
+# 🎯 EfficientNet Hyperparameter Sweep - BEGINNER FRIENDLY
+# ============================================================
+
+# 📖 WHAT IS A HYPERPARAMETER SWEEP?
+# A sweep automatically trains multiple models with different settings to find the best combination.
+# Instead of manually trying different learning rates, optimizers, etc., the sweep does it automatically.
+# This helps you find the optimal settings for your specific dataset without guesswork.
+
+# 🔍 SEARCH METHOD
+method: bayes                   # 🧠 Bayesian optimization - smart search algorithm
+                                # "bayes" = learns from previous results to make better guesses
+                                # "random" = tries random combinations (faster but less efficient)
+                                # "grid" = tries every combination (thorough but very slow)
+
+# 🎯 OPTIMIZATION TARGET
 metric:
-  goal: maximize
-  name: val/metrics/f1_macro
+  goal: maximize                # 📈 We want to maximize this metric
+  name: val/metrics/f1_macro    # 🏆 F1 macro score (balanced accuracy across all classes)
+                                # This metric works well for most classification tasks
+                                # Alternative: "val/metrics/accuracy_top1" for simple accuracy
 
+# 🔧 PARAMETERS TO OPTIMIZE
 parameters:
-  # Model related parameters
+  
+  # 🤖 MODEL ARCHITECTURE SETTINGS
   model_name:
-    values: ["efficientnet"]
-
+    values: ["efficientnet"]    # 🧠 Only testing EfficientNet in this sweep
+  
   efficientnet_variant:
-    values: ['b2', 'b3', 'b4', 'b5']  # Sweep over different efficient variants
-  # Loss related parameters
+    values: ['b2', 'b3', 'b4', 'b5']  # 📏 Test different EfficientNet sizes
+                                       # b2 = faster, less accurate
+                                       # b5 = slower, more accurate
+                                       # Sweep will find the best balance for your data
+  
+  # 📉 LOSS FUNCTION SETTINGS
   loss_type:
-    values: ["weighted", "focal", "labelsmoothing"]
-
+    values: ["weighted", "focal", "labelsmoothing"]  # 🎯 Different loss functions
+                                                     # "weighted" = handles class imbalance automatically
+                                                     # "focal" = focuses on hard-to-classify examples
+                                                     # "labelsmoothing" = prevents overconfidence
+  
+  # 🔧 FOCAL LOSS PARAMETERS (only used when loss_type = "focal")
   focal_alpha:
-    min: 0.1
-    max: 0.5
-
+    min: 0.1                    # ⚖️ Balance between positive/negative examples
+    max: 0.5                    # Lower = focus on negative examples, Higher = focus on positive
+  
   focal_gamma:
-    min: 1.0
-    max: 3.0    
-
+    min: 1.0                    # 🎯 How much to focus on hard examples
+    max: 3.0                    # Higher = focus more on difficult cases
+  
+  # ⚖️ CLASS BALANCING
   use_per_class_alpha:
-    values: [true, false]
-
+    values: [true, false]       # Whether to weight classes differently
+                                # true = give more weight to underrepresented classes
+                                # false = treat all classes equally
+  
+  # 🎚️ LABEL SMOOTHING PARAMETER (only used when loss_type = "labelsmoothing")
   labelsmoothing_epsilon:
-    min: 0.05
-    max: 0.2
-
-  # Hyperparameters
+    min: 0.05                   # 📊 Amount of label smoothing
+    max: 0.2                    # Higher = more smoothing, less overconfidence
+  
+  # 🏋️ TRAINING SETTINGS
   epochs:
-    value: 30
-
+    value: 30                   # 🔄 Fixed number of training epochs for all runs
+                                # Enough to see clear results without taking too long
+  
   batch_size:
-    values: 64
-
+    values: 64                  # 🔢 Fixed batch size
+                                # You can add more values like [32, 64, 128] to test different sizes
+  
   optimizer:
-    values: ["adamw", "adam"]
-
+    values: ["adamw", "adam"]   # 🎯 Test different optimization algorithms
+                                # Both are good choices - sweep will find which works better
+  
+  # 📈 LEARNING RATE SEARCH (very important!)
   learning_rate:
     values: [1e-7, 5e-7,1e-6, 5e-6,1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 2e-1]
-
+    # 🔍 Testing a wide range from very small (1e-7) to large (2e-1)
+    # The sweep will find the sweet spot for your data
+  
+  # 🛡️ WEIGHT DECAY SEARCH (regularization)
   weight_decay:
     values: [1e-7, 5e-7,1e-6, 5e-6,1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 2e-1]
-
+    # 🔍 Testing different regularization strengths
+    # Higher values prevent overfitting but might hurt performance
+  
+  # ⏹️ FIXED TRAINING SETTINGS
   early_stopping_patience:
-    value: 15
+    value: 15                   # Stop training if no improvement for 15 epochs
+    
   device:
-    value: "cuda"
+    value: "cuda"               # 💻 Use GPU for all sweep runs (much faster)
+
+# 💡 HOW TO USE THIS SWEEP:
+# 1. Make sure you have Weights & Biases account and are logged in
+# 2. Run: python3 run_sweep.py --sweep_config configs/sweeps/sweep_efficientnet.yaml
+# 3. The sweep will automatically run multiple training sessions
+# 4. Check W&B dashboard to see results and find the best configuration
+# 5. Use the best settings for your final training run
+
+# 🎯 WHAT TO EXPECT:
+# - The sweep will run 20-50 different combinations automatically
+# - Each run takes the same time as normal training (30 epochs)
+# - Total time: several hours to a day depending on your dataset
+# - Results: optimal hyperparameters for your specific data
+
+# ⚠️ BEGINNER WARNINGS:
+# - Sweeps use lots of computational resources - make sure you have time/budget
+# - Start with a smaller sweep first (fewer values) to test
+# - Monitor the first few runs to ensure everything works correctly
+# - Consider running during off-hours due to long duration
+
+# 🔧 CUSTOMIZATION FOR BEGINNERS:
+# To make this sweep faster for testing:
+# 1. Reduce efficientnet_variant to just ['b2', 'b3']
+# 2. Reduce learning_rate values to [1e-6, 1e-5, 1e-4, 1e-3]
+# 3. Reduce weight_decay values to [1e-5, 1e-4, 1e-3, 1e-2]
+# 4. Set epochs to 15 instead of 30 for faster testing

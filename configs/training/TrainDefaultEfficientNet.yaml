@@ -1,58 +1,126 @@
 # ============================================================
-# EfficientNet B5 Production Configuration with ALL OPTIONS
+# 🧠 EfficientNet B5 Training Configuration - BEGINNER FRIENDLY
 # ============================================================
 
-# This configuration file is designed to train an EfficientNet B5 Model 
-# which gave the best performances on our EcoTaxa dataset.
-# Its a good starting point for your experimentations, but feel free to modify it. 
+# 📖 WHAT IS THIS FILE?
+# This configuration file tells the training system how to train an EfficientNet B5 model.
+# EfficientNet B5 gave the best performance on our plankton dataset, so it's a great starting point.
+# You can modify any of these settings to experiment with different configurations.
 
-# Custom training run name, used for tracking and so you can easily find your run
-run_name: "EfficientNet_Default_Config"  # Custom run name for testing
+# 🏷️ TRAINING RUN IDENTIFICATION
+# This name helps you identify your training run in logs and results, modify {attributes} with key words
+run_name: "EfficientNet_Default_Config_Run_{attributes}"  # The system will add date/time automatically
 
-# DATA CONFIGURATION
+# 📂 DATA CONFIGURATION
+# Tell the system where to find your preprocessed dataset
 data:
-  # Typically this is the path to your MyOwnDataset_final_dataset after preprocessing
-  dataset_path: "DATA/final_dataset"  # Path to dataset.yaml
-  
-# PROJECT CONFIGURATION
+  # ⚠️ IMPORTANT: This should point to your final preprocessed dataset folder
+  # After running preprocessing, you'll have a folder like "DATA/YourDataset_final_dataset"
+  # This folder should contain train/, val/, test/ subfolders and a dataset.yaml file
+  dataset_path: "DATA/YourOwnDataset_final_dataset"  
+
+# 📊 PROJECT TRACKING (Weights & Biases)
 project:
-  name: "YourWandBProjectName"     # W&B project name
+  # If you're using Weights & Biases for tracking, this is your project name
+  # You can create a new project on wandb.ai or use an existing one
+  name: "YourWandBProjectName"     
 
-# MODEL CONFIGURATION
+# 🤖 MODEL CONFIGURATION
+# This section defines what type of neural network to use
 model:
-  name: "efficientnet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
-  variant: "b5"             # EfficientNet variants: "b0"-"b7"
-  pretrained: true          # Use pretrained weights
-  freeze_backbone: false    # Freeze backbone layers
-  input_size: 224           # Input image size (224, 256, 384, etc.)
-  num_classes: 76           # Number of output classes
-  
-# TRAINING CONFIGURATION
+  name: "efficientnet"      # Type of model architecture
+                           # Options: "efficientnet" (recommended), "resnet", "densenet", "yolov11"
+                           
+  variant: "b5"            # EfficientNet size/complexity
+                           # Options: "b0" (smallest/fastest) to "b7" (largest/most accurate)
+                           # b5 is a good balance between speed and accuracy
+                           
+  pretrained: true         # 🔥 IMPORTANT: Start with weights trained on ImageNet
+                           # true = faster training, better results (RECOMMENDED)
+                           # false = train from scratch (slower, needs more data), not tested properly
+                           
+  freeze_backbone: false   # Whether to freeze the feature extraction layers
+                           # false = train all layers (RECOMMENDED for most cases)
+                           # true = only train the final classification layer
+                           
+  input_size: 224          # Image size in pixels (224x224)
+                           # All images will be resized to this size
+                           # 224 is standard and works well for most cases
+                           
+  num_classes: 76          # 📊 Number of different species/classes in your dataset
+                           # This MUST match the number of classes in your preprocessed data
+
+# 🏋️ TRAINING CONFIGURATION
+# These settings control how the model learns
 training:
-  batch_size: 64              # Training batch size - yoou might want to increase this if you have enough GPU memory
-                              # Or decrease it if you have memory issues
+  batch_size: 64          # 🔢 Number of images processed at once
+                          # Larger = faster training but needs more GPU memory
+                          # If you get "out of memory" errors, reduce this (try 32, 16, 8)
+                          # If training is slow and you have GPU memory, increase this
+                          
+  learning_rate: 0.00001  # 📈 How fast the model learns
+                          # Smaller = slower but more stable learning (RECOMMENDED: 0.00001-0.001)
+                          # Larger = faster but might overshoot optimal weights
+                          # Start with 0.00001 for stable results
+                          
+  weight_decay: 0.0001    # 🛡️ Regularization to prevent overfitting
+                          # Higher values = more regularization (range: 0.0001-0.01)
+                          # Helps the model generalize better to new data
+                          
+  epochs: 30              # 🔄 Number of complete passes through your dataset
+                          # More epochs = longer training but potentially better results
+                          # Training will stop early if no improvement is seen
+                          
+  optimizer: "adam"       # 🎯 Algorithm used to update model weights
+                          # "adam" = good default choice, stable and reliable
+                          # "adamw" = often better results, worth trying
+                          
+  early_stopping_patience: 15  # ⏹️ Stop training if no improvement for this many epochs
+                                # Prevents wasting time and overfitting
+                                # 15 is a good balance - you can increase for longer patience
+                                
+  device: "cuda"          # 💻 Where to run training
+                          # "cuda" = use GPU (MUCH faster, recommended)
+                          # "cpu" = use CPU (slower but works without GPU)
+                          
+  num_workers: 8          # 👥 Number of parallel processes for loading data
+                          # Higher = faster data loading (if you have many CPU cores)
+                          # Lower if you have limited CPU cores (try 4 or 2)
 
-  learning_rate: 0.00001        # Initial learning rate - should work in most cases, but you can try to decrease it
-  weight_decay: 0.0001          # Weight decay (L2 regularization)
-  epochs: 30                    # Number of epochs to train your model - adjust this based on your wanted training time 
-  optimizer: "adam"             # Options: "adam", "adamw". "adamw" is recommended for most cases"
-  early_stopping_patience: 15   # Early stopping patience - this is the number of epochs without improvement before stopping training
-  device: "cuda"                # Options: "cuda", "cpu", "auto"
-  num_workers: 8                # Number of data loader workers
-
-
-# LOSS CONFIGURATION
+# 📉 LOSS FUNCTION CONFIGURATION
+# This determines how the model measures and learns from its mistakes
 loss:
-  type: "labelsmoothing"                     # Options: "focal", "labelsmoothing", "weighted"
-  label_smoothing: 0.118590893086864         # Label smoothing parameter (0.0-1.0)
-  use_per_class_alpha: true                   # Use per-class weights
+  type: "labelsmoothing"        # 🎯 Type of loss function
+                                # "labelsmoothing" = prevents overconfidence, good for noisy data
+                                # "focal" = good for imbalanced datasets (some classes have few examples)
+                                # "weighted" = automatically handles class imbalance
+                                
+  label_smoothing: 0.118590893086864  # 🎚️ How much to smooth the labels (0.0-1.0)
+                                       # Higher = more smoothing, prevents overconfidence
+                                       # This value was found to work well for plankton data
+                                       
+  use_per_class_alpha: true     # ⚖️ Use different weights for different classes
+                                # true = helps with imbalanced datasets (RECOMMENDED)
+                                # false = treat all classes equally
 
-  # Focal loss options (when type: "focal"):
-  # focal_alpha: 1.0             # Focal loss alpha parameter
-  # focal_gamma: 2.0             # Focal loss gamma parameter
+  # 🔧 ALTERNATIVE LOSS FUNCTIONS (uncomment to use):
+  # If you want to try focal loss instead of label smoothing:
+  # focal_alpha: 1.0             # Balances positive/negative examples (0.25-1.0)
+  # focal_gamma: 2.0             # Focus on hard examples (1.0-3.0, higher = more focus)
 
-# WEIGHTS & BIASES CONFIGURATION
+# 📊 WEIGHTS & BIASES CONFIGURATION (Online Experiment Tracking)
 wandb:
-  log_results: false
-  tags: ["production", "efficientnet", "b5", "label_smoothing"]
-  notes: "Production EfficientNet B5 with label smoothing"
+  log_results: false            # 📈 Whether to upload results to Weights & Biases website
+                                # true = upload training progress, charts, and results online
+                                # false = save everything locally only, good if you plan to only do few runs
+                                
+  tags: ["production", "efficientnet", "b5", "label_smoothing"]  # 🏷️ Tags to organize your experiments
+  
+  notes: "Production EfficientNet B5 with label smoothing"       # 📝 Description of this experiment
+
+# 💡 TIPS FOR BEGINNERS:
+# 1. Start with this exact configuration - it's proven to work well
+# 2. If you get "out of memory" errors, reduce batch_size to 32 or 16
+# 3. If training is too slow, you can reduce epochs to 15-20 for testing
+# 4. If your dataset has very different classes than plankton, try learning_rate: 0.001
+# 5. Always check that num_classes matches your actual number of species/classes

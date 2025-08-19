@@ -1,65 +1,160 @@
-# Hierarchical Dataset Preprocessing Configuration
-# For datasets already organized by class in folders
+# ============================================================
+# 🗂️ HIERARCHICAL DATASET PREPROCESSING - BEGINNER FRIENDLY
+# ============================================================
+
+# 📖 WHAT IS HIERARCHICAL DATA?
+# This is when your images are organized in folders, where each folder name is a species/class name.
+# Example structure:
+# your_data/
+# ├── species_A/
+# │   ├── image1.jpg
+# │   ├── image2.jpg
+# ├── species_B/
+# │   ├── image3.jpg
+# │   └── image4.jpg
+
+# 📂 INPUT DATA CONFIGURATION
 input_source:
-  type: "hierarchical"
-  data_path: "DATA/YourHierarchicalDataset"  # Path to your hierarchical dataset
-  subdirs: []  # Empty = direct class folders under data_path
+  type: "hierarchical"          # Tell the system this is folder-organized data
+  data_path: "DATA/sample_hierarchical"  # 🗂️ Path to your main data folder
+                                         # Change this to point to YOUR data folder
+  subdirs: []                   # 📁 Empty = class folders are directly under data_path
+                                # If your data has extra folder levels, specify them here
+                                # Example: ["train"] if you have DATA/your_data/train/species_folders/
 
+# 🔧 PREPROCESSING SETTINGS
 preprocessing:
-  # Enable scalebar removal if needed, depending on wether your dataset requires it
+  
+  # 🏗️ SCALEBAR REMOVAL (removes scale bars from microscopy images)
   scalebar_removal:
-    enabled: true
-    model_path: "models/model_weights/scale_bar_remover/best.pt" # This shouldnt be changed
-    confidence: 0.4 # Confidence threshold for scalebar removal, 0.4 has been found to work well
-    img_size: 416 # Image size for scalebar removal model
+    enabled: true               # 🔍 Whether to detect and remove scale bars from images
+                                # true = remove scale bars (RECOMMENDED for microscopy images)
+                                # false = leave images unchanged
+                                
+    model_path: "models/model_weights/scale_bar_remover/best.pt"  # 🤖 Pre-trained scale bar detection model
+                                                                  # Don't change this path - it's the trained model
+                                                                  
+    confidence: 0.4             # 🎯 How confident the model needs to be to detect a scale bar (0.0-1.0)
+                                # 0.4 = good balance, detects most scale bars without false positives
+                                # Lower = detects more scale bars but may make mistakes
+                                # Higher = more careful but might miss some scale bars
+                                
+    img_size: 416               # 📐 Image size for scale bar detection model
+                                # Keep this at 416 - it's optimized for the detection model
   
+  # 🎨 COLOR CONVERSION
   grayscale_conversion:
-    enabled: true # This parameter can be set to false if your images are already in RGB format
-    mode: "RGB"
+    enabled: true               # 🌈 Convert grayscale images to RGB format
+                                # true = ensure all images have color channels (RECOMMENDED)
+                                # false = keep original format (only if all images are already RGB)
+    mode: "RGB"                 # Color mode - keep as "RGB"
   
+  # 🧹 IMAGE FILTERING (removes bad/insufficient data)
   image_filtering:
-    min_images_per_class: 10  # Minimum number of images per class to keep
-    max_images_per_class: null # No upper limit on images per class (null means no limit), or set to a specific number
-    skip_corrupted_images: true
+    min_images_per_class: 10    # 📊 Remove classes with fewer than this many images
+                                # Classes with too few images can't be learned properly
+                                # 10 is minimum, 50+ is better for good results
+                                
+    max_images_per_class: null  # 📏 Maximum images per class (null = no limit)
+                                # Set a number (e.g., 1000) if some classes have too many images
+                                # null = keep all images
+                                
+    skip_corrupted_images: true # 🚫 Skip images that can't be opened
+                                # true = ignore broken image files (RECOMMENDED)
   
+  # 📊 DATA SPLITTING (divide data into training/validation/test sets)
   data_splitting:
-    train_ratio: 0.7
-    val_ratio: 0.2
-    test_ratio: 0.1
-    stratified: true
-    random_seed: 42
+    train_ratio: 0.7            # 🏋️ Fraction of data for training (0.7 = 70%)
+                                # This is where the model learns patterns
+                                
+    val_ratio: 0.2              # 📏 Fraction for validation (0.2 = 20%)
+                                # Used to monitor training progress and tune settings
+                                
+    test_ratio: 0.1             # 🧪 Fraction for final testing (0.1 = 10%)
+                                # Used to evaluate final model performance
+                                # train_ratio + val_ratio + test_ratio must equal 1.0
+                                
+    stratified: true            # ⚖️ Keep class proportions balanced across splits
+                                # true = each split has similar class distribution (RECOMMENDED)
+                                
+    random_seed: 42             # 🎲 Random seed for reproducible splits
+                                # Same seed = same splits every time you run preprocessing
   
+  # 🔄 DATA AUGMENTATION (creates more training examples)
   augmentation:
-    enabled: true
-    target_images_per_class: 50  # Depending on your dataset size, you can adjust this number
-    # This is the target number of images per class after augmentation
-    # If you have a small dataset, you might want to lower this number, or vice versa
+    enabled: true               # 🎨 Create additional training images through transformations
+                                # true = more training data, better model performance (RECOMMENDED)
+                                # false = use only original images
+                                
+    target_images_per_class: 30 # 🎯 Target number of images per class after augmentation
+                                # Smaller datasets: try 50-200
+                                # Larger datasets: try 500-2000
+                                # Adjust based on your computational resources
+                                
+    max_copies_per_image: 3     # 📸 Maximum augmented versions per original image
+                                # Higher = more variety but also more processing time
+                                # 3-5 is usually a good range
 
-    max_copies_per_image: 5 # Maximum number of augmented copies per image
-
-    # Augmentation techniques to apply, you can adjust the probabilities based on your dataset but
-    # these values are generally good starting points
+    # 🎭 AUGMENTATION TECHNIQUES (how to modify images)
+    # Each number is the probability (0.0-1.0) of applying that transformation
     techniques:
-      horizontal_flip: 0.5
-      vertical_flip: 0.2
-      rotate_90: 0.3
-      brightness_contrast: 0.4
-      hue_saturation: 0.3
+      horizontal_flip: 0.5      # 🔄 Flip image left-right (50% chance)
+                                # Good for most natural images
+                                
+      vertical_flip: 0.2        # ↕️ Flip image top-bottom (20% chance)
+                                # Lower probability - not all images make sense flipped vertically
+                                
+      rotate_90: 0.3            # 🔄 Rotate by 90 degrees (30% chance)
+                                # Good for microscopy images that can be oriented any way
+                                
+      brightness_contrast: 0.4  # ☀️ Adjust brightness and contrast (40% chance)
+                                # Helps model handle different lighting conditions
+                                
+      hue_saturation: 0.3       # 🌈 Adjust color properties (30% chance)
+                                # Helps with color variations in images
       
+# 📁 OUTPUT CONFIGURATION (where to save processed data)
 output:
-  # Base path for output files
-  base_path: "DATA/YourHierarchicalDataset"
-  # Processed path where files with no scale bars will be saved
-  processed_path: "DATA/YourHierarchicalDataset_processed"
-  # Final dataset path where the final dataset will be saved
-  final_dataset_path: "DATA/YourHierarchicalDataset_final_dataset"
-  # Unless you already have a dataset YAML file, please always set this to true since its needed for training
-  create_dataset_yaml: true
-  
+  base_path: "DATA/sample_hierarchical"                    # 📂 Keep same as input data_path
+                                                           # Base folder for organizing outputs
+                                                           
+  processed_path: "DATA/sample_hierarchical_processed"     # 🔧 Intermediate processing folder
+                                                           # Images after scalebar removal and filtering
+                                                           # You usually don't need to look in here
+                                                           
+  final_dataset_path: "DATA/sample_hierarchical_final_dataset"  # 🎯 FINAL OUTPUT FOLDER
+                                                                # This is what you'll use for training!
+                                                                # Contains train/, val/, test/ folders
+                                                                
+  create_dataset_yaml: true                                # 📄 Create dataset.yaml file for training
+                                                           # true = creates config file needed for training (REQUIRED)
+                                                           # false = skip yaml creation (only if you already have one)
+
+# 📊 LOGGING CONFIGURATION (track what happens during preprocessing)
 logging:
-  # Disable W&B logging for preprocessing
-  wandb_enabled: false  
-  # These features are not yet implemented 
-  log_class_distribution: true
-  log_sample_images: false
-  log_processing_times: true
+  wandb_enabled: false          # 🌐 Upload preprocessing logs to Weights & Biases
+                                # false = keep logs local only (RECOMMENDED for preprocessing)
+                                # true = upload statistics and charts online
+  
+  # These features are not yet implemented                                     
+  log_class_distribution: true  # 📊 Show how many images per class
+                                # true = see statistics about your data balance
+  log_sample_images: false      # 🖼️ Save example processed images
+                                # false = faster processing (RECOMMENDED)
+                                # true = save examples to see what preprocessing did                      
+  log_processing_times: true    # ⏱️ Track how long each step takes
+                                # true = see performance statistics
+
+# 💡 QUICK START GUIDE:
+# 1. Change data_path to point to YOUR image folders
+# 2. Adjust target_images_per_class based on your dataset size:
+#    - Small dataset (< 1000 images): try 100-300
+#    - Medium dataset (1000-10000 images): try 500-1000  
+#    - Large dataset (> 10000 images): try 1000-3000
+# 3. Run: python3 run_preprocessing.py --config configs/preprocessing/PreprocessWithHierarchical.yaml
+# 4. Use the final_dataset_path folder for training!
+
+# 🚨 COMMON ISSUES:
+# - "No classes found": Check that data_path points to folder containing species folders
+# - "Not enough images": Reduce min_images_per_class or get more data
+# - "Out of memory": Reduce target_images_per_class or max_copies_per_image

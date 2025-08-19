@@ -1,52 +1,135 @@
 # ============================================================
-# DenseNet 161 Production Configuration with ALL OPTIONS
+# 🌲 DenseNet 161 Training Configuration - BEGINNER FRIENDLY
 # ============================================================
 
-# This configuration file is designed to train a DenseNet 161 Model 
-# Its a good starting point for your experimentations, but feel free to modify it. 
+# 📖 WHAT IS DenseNet?
+# DenseNet (Densely Connected Network) is a neural network where each layer connects to all subsequent layers.
+# This creates very efficient information flow and often achieves excellent accuracy with fewer parameters.
+# DenseNet 161 is a good balance between accuracy and computational requirements.
+# It's known for being memory-efficient and achieving high performance on image classification tasks.
 
-run_name: "DenseNet_Default_Config"  # Custom run name for testing
+# 🏷️ TRAINING RUN IDENTIFICATION
+run_name: "DenseNet_Default_Config_Run_CARO"  # Name to identify this training session
 
-
-# DATA CONFIGURATION
+# 📂 DATA CONFIGURATION
 data:
-  dataset_path: "DATA/final_dataset"  # Path to dataset.yaml
-  
-# PROJECT CONFIGURATION
+  # ⚠️ IMPORTANT: Point this to your final preprocessed dataset folder
+  # Should contain train/, val/, test/ subfolders and a dataset.yaml file
+  dataset_path: "DATA/sample_hierarchical_final_dataset"  
+
+# 📊 PROJECT TRACKING (Weights & Biases)
 project:
-  name: "YourWandBProjectName"     # W&B project name
+  name: "YourWandBProjectName"     # Your experiment tracking project name
 
-# MODEL CONFIGURATION
+# 🤖 MODEL CONFIGURATION
 model:
-  name: "densenet"      # Options: "efficientnet", "resnet", "densenet", "yolov11"
-  variant: "161"             
-  pretrained: true          # Use pretrained weights
-  freeze_backbone: false    # Freeze backbone layers
-  input_size: 224           # Input image size (224, 256, 384, etc.)
-  num_classes: 76           # Number of output classes - typically from your dataset.yaml
+  name: "densenet"              # 🌲 Use DenseNet architecture
+                                # DenseNet is efficient, accurate, and good for most image types
+                                # Excellent choice when you want high accuracy with reasonable speed
+                                
+  variant: "161"                # 📏 DenseNet depth/complexity
+                                # Options: "121" (fastest), "161" (balanced), "169", "201" (most accurate)
+                                # 161 = good balance of speed and accuracy (RECOMMENDED for beginners)
+                                # 121 = try this first if 161 is too slow
+                                
+  pretrained: true              # 🔥 Start with ImageNet pre-trained weights (HIGHLY RECOMMENDED)
+                                # true = much faster training and better results
+                                # false = train from scratch (not recommended)
+                                
+  freeze_backbone: false        # 🧊 Whether to freeze feature extraction layers
+                                # false = train entire network (RECOMMENDED)
+                                # true = only train final classification layer (faster but less accurate)
+                                
+  input_size: 224               # 📐 Input image size (224x224 pixels)
+                                # All images will be resized to this size automatically
+                                
+  num_classes: 5                # 📊 Number of different species/classes in your dataset
+                                # MUST match the number of classes in your preprocessed data!
+                                # Check your dataset.yaml file to confirm this number
 
-
-# TRAINING CONFIGURATION
+# 🏋️ TRAINING CONFIGURATION
+# These settings control how the model learns from your data
 training:
-  batch_size: 64               # Training batch size
-  learning_rate: 0.000001        # Initial learning rate
-  weight_decay: 0.001           # Weight decay (L2 regularization)
-  epochs: 30                    # Maximum number of epochs
-  optimizer: "adamw"           # Options: "adam", "adamw", "sgd", "rmsprop"
-  early_stopping_patience: 15  # Early stopping patience
-  device: "cuda"               # Options: "cuda", "cpu", "auto"
-  num_workers: 8               # Number of data loader workers
-  
+  batch_size: 64                # 🔢 Number of images processed together
+                                # DenseNet 161 is memory-efficient, so 64 usually works
+                                # If you get "out of memory" errors, try: 32, 16
+                                # If you have lots of GPU memory, you can try: 128
+                                
+  learning_rate: 0.000001       # 📈 How fast the model learns (very important!)
+                                # 0.000001 (1e-6) = very conservative, stable learning
+                                # For faster training, you could try: 0.00001 (1e-5)
+                                # For very careful training: 0.0000001 (1e-7)
+                                
+  weight_decay: 0.001           # 🛡️ Regularization to prevent overfitting
+                                # 0.001 = moderate regularization (good default)
+                                # Higher (0.01) = more regularization if overfitting
+                                # Lower (0.0001) = less regularization if underfitting
+                                
+  epochs: 30                    # 🔄 Number of complete passes through your dataset
+                                # 30 = good starting point
+                                # More epochs = potentially better results but longer training
+                                # Training will stop early if no improvement
+                                
+  optimizer: "adamw"            # 🎯 Algorithm for updating model weights
+                                # "adamw" = excellent choice for DenseNet (RECOMMENDED)
+                                # "adam" = also good, slightly different behavior
+                                
+  early_stopping_patience: 15   # ⏹️ Stop if no improvement for this many epochs
+                                # 15 = reasonable patience, prevents wasting time
+                                # Increase to 20-25 if you want to be more patient
+                                
+  device: "cuda"                # 💻 Where to run training
+                                # "cuda" = use GPU (MUCH faster, recommended)
+                                # "cpu" = use CPU (much slower, only if no GPU)
+                                # "auto" = automatically choose best option
+                                
+  num_workers: 8                # 👥 Number of parallel processes for loading data
+                                # 8 = good for most systems
+                                # Reduce to 4 or 2 if you have fewer CPU cores
 
-# LOSS CONFIGURATION
+# 📉 LOSS FUNCTION CONFIGURATION
+# This determines how the model measures and learns from its mistakes
 loss:
-  type: "labelsmoothing"       # Options: "focal", "labelsmoothing", "weighted"
-  label_smoothing: 0.06551355150302052         # Label smoothing parameter (0.0-1.0)
-  use_per_class_alpha: false    # Use per-class weights
-  
+  type: "labelsmoothing"        # 🎯 Type of loss function
+                                # "labelsmoothing" = prevents overconfidence, good for most datasets
+                                # "focal" = better for highly imbalanced datasets
+                                # "weighted" = automatically handles class imbalance
+                                
+  label_smoothing: 0.06551355150302052  # 🎚️ How much to smooth the labels (0.0-1.0)
+                                        # This specific value was optimized for DenseNet
+                                        # Higher values = more smoothing, less overconfidence
+                                        # You can try values between 0.05-0.15
+                                        
+  use_per_class_alpha: false    # ⚖️ Whether to use different weights for different classes
+                                # false = treat all classes equally
+                                # true = give more weight to underrepresented classes
 
-# WEIGHTS & BIASES CONFIGURATION
+# 📊 WEIGHTS & BIASES CONFIGURATION (Experiment Tracking)
 wandb:
-  log_results: false
-  tags: ["reproduce", "densenet", "161"]
-  notes: "Reproduce Best DenseNet 161"
+  log_results: false            # 📈 Upload training progress to Weights & Biases website
+                                # false = save everything locally only (good for beginners)
+                                # true = see charts and progress online
+                                
+  tags: ["densenet", "161", "classification"]  # 🏷️ Tags to organize experiments
+  
+  notes: "DenseNet 161 training - efficient and accurate model"  # 📝 Experiment description
+
+# 🌟 DENSENET ADVANTAGES:
+# ✅ Memory efficient - uses less GPU memory than ResNet
+# ✅ Feature reuse - each layer uses features from all previous layers
+# ✅ Good accuracy - often performs as well as larger models
+# ✅ Stable training - less prone to vanishing gradient problems
+# ✅ Good for beginners - reliable and forgiving
+
+# 💡 BEGINNER TIPS:
+# 1. DenseNet 161 is an excellent choice for most image classification tasks
+# 2. If training is too slow, try variant: "121" instead
+# 3. If you have a very small dataset, consider increasing weight_decay to 0.01
+# 4. Monitor the training loss - it should decrease steadily
+# 5. DenseNet often works well with smaller learning rates - stick with 0.000001
+
+# 🔧 TROUBLESHOOTING:
+# - "Out of memory": Reduce batch_size to 32 or 16
+# - "Training too slow": Try DenseNet 121 (variant: "121")
+# - "Poor accuracy": Increase epochs to 50, or try learning_rate: 0.00001
+# - "Overfitting": Increase weight_decay to 0.01 or reduce epochs

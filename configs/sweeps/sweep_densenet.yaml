@@ -1,4 +1,6 @@
-method: bayes  
+# For more comments, please refer to sweep_efficientnet.yaml since those files are essentially the same
+
+method: bayes
 metric:
   goal: maximize
   name: val/metrics/f1_macro
