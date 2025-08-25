@@ -87,7 +87,7 @@ Virtual environments in Python are isolated directories that contain their own P
 To create a virtual environment, open a terminal in the folder where you downloaded the project and run :
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 ```
 
 Where **.venv** will be the name of the folder holding the virtual environment. 
@@ -111,7 +111,7 @@ Now, depending on your Operating System :
 - Using bash : 
 
 ```bash
-source .venv/Scripts/activate
+source .venv/bin/activate
 ```
 
 After activation, your terminal will change to show the venv name. 
@@ -398,6 +398,7 @@ Use trained models to make predictions on new images:
 python3 run_inference.py --config configs/inference/your_inference_config.yaml
 ```
 
+
 Example configuration (`configs/inference/DefaultInference.yaml`):
 ```yaml
 # Model Configuration
@@ -406,6 +407,12 @@ model:
   variant: "b5"             # Model variant
   weights_path: "model_weights/efficientnet/b5/my_experiment/best.pt"
   num_classes: 76           # Number of classes (must match training)
+
+# Dataset YAML for Class Names
+dataset_yaml: "DATA/final_dataset/dataset.yaml"  # <-- Path to the YAML file containing class names
+  # This file is generated automatically during preprocessing.
+  # It MUST match the dataset used for training this model.
+  # The class names will be read from the 'names' field in this YAML.
 
 # Inference Configuration
 inference:
@@ -427,28 +434,16 @@ wandb:
   notes: "Production inference run"
 ```
 
+
+**How class names are handled:**
+- The `dataset_yaml` field in your inference config should point to the YAML file generated during preprocessing (e.g., `DATA/final_dataset/dataset.yaml`).
+- The system will read the class names from the `names` field in this YAML, ensuring the class order matches what was used during training.
+- This prevents label mismatches and makes inference robust to changes in the dataset structure.
+
 **Inference Output:**
-The system generates:
 - CSV file with detailed predictions and confidence scores (specified in `output_path`)
 - Predictions include top-K classes with probabilities for each image
 - Optional scalebar preprocessing applied automatically if enabled
-
-**Advanced Inference Features:**
-```yaml
-# Multiple output formats
-inference:
-  save_csv: true                        # CSV with detailed results
-  output_path: "results/detailed_predictions.csv"
-  
-# Preprocessing during inference
-preprocessing:
-  scalebar_removal: true                # Remove scalebars before prediction
-  
-# Model-specific settings
-model:
-  num_classes: 76                       # Must match training dataset
-  weights_path: "path/to/best.pt"       # Path to trained model weights
-```
 
 ### Hyperparameter Optimization
 
