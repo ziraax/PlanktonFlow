@@ -76,8 +76,21 @@ def run_inference(args, config):
 
         
         image_paths = processed_image_paths
-            
-        class_names = get_classes_names()        
+
+        # --- Load class names from dataset_yaml if provided ---
+        import yaml
+        dataset_yaml_path = config.get('dataset_yaml', None)
+        if dataset_yaml_path is not None and os.path.isfile(dataset_yaml_path):
+            with open(dataset_yaml_path, 'r') as f:
+                dataset_yaml = yaml.safe_load(f)
+            class_names = dataset_yaml.get('names', [])
+            if not class_names:
+                print(f"[WARNING] No 'names' field found in {dataset_yaml_path}. Class names will be empty.")
+        else:
+            print(f"[WARNING] dataset_yaml not specified or file not found. Falling back to get_classes_names().")
+            class_names = get_classes_names()
+            print(f"[WARNING] Class names:", class_names)
+
         # Check if model config specifies num_classes, otherwise use detected classes
         model_config = config.get('model', {})
         num_classes = model_config.get('num_classes', len(class_names) if class_names else 76)

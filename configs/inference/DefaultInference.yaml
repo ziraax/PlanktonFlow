@@ -6,24 +6,19 @@
 # Inference means using your trained model to make predictions on new, unseen images.
 # After training a model, you use this config to classify new images and get species predictions.
 
+
 # 🤖 MODEL CONFIGURATION (which trained model to use)
 model:
-  name: "densenet"              # 🧠 Type of model architecture
-                                # Options: "efficientnet", "resnet", "densenet", "yolov11"
-                                # This MUST match the type you used for training
-                                
-  variant: "161"                # 📏 Model size/variant
-                                # Must match what you used during training
-                                # EfficientNet: b0-b7, ResNet: 18,34,50,101,152, DenseNet: 121,161,169,201
-                                
+  name: "densenet"              # Type of model architecture
+  variant: "161"                # Model size/variant
   weights_path: "model_weights/densenet/161/DenseNet_Default_Config_Run_CARO_20250818_144738/best.pt"
-                                # 📁 Path to your trained model file
-                                # ⚠️ IMPORTANT: Change this to YOUR model's path!
-                                # Look in model_weights/[model_name]/[variant]/[your_run_name]/best.pt
-                                
-  num_classes: 5                # 📊 Number of classes the model was trained on
-                                # This MUST match your training dataset
-                                # Check your training logs or dataset.yaml to confirm this number
+  num_classes: 5                # Number of classes the model was trained on
+
+# 📄 DATASET YAML (for class names)
+dataset_yaml: "DATA/sample_hierarchical_final_dataset/dataset.yaml"  # <-- Path to the YAML file containing class names
+  # This file is generated automatically during preprocessing.
+  # It MUST match the dataset used for training this model.
+  # The class names will be read from the 'names' field in this YAML.
 
 # 🔍 INFERENCE SETTINGS (how to run predictions)
 inference:
@@ -54,14 +49,14 @@ inference:
 
 # 🔧 OPTIONAL PREPROCESSING (clean images before prediction)
 preprocessing:
-  scalebar_removal: true        # 🔍 Remove scale bars from images before classification
+  scalebar_removal: false        # 🔍 Remove scale bars from images before classification
                                 # true = detect and remove scale bars (RECOMMENDED for microscopy)
                                 # false = use images as-is
                                 # Should match what you used during training data preprocessing
   
 # 📊 EXPERIMENT TRACKING (Weights & Biases)
 wandb:
-  log_results: true             # 📈 Upload results to Weights & Biases
+  log_results: false             # 📈 Upload results to Weights & Biases
                                 # true = see results online with charts and images
                                 # false = keep results local only
                                 
