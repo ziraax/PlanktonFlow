@@ -79,8 +79,8 @@ Make sure to check "Add Python to PATH" during installation.
 Option 1 : Using Git for more experienced users
 
 ```bash
-git clone https://github.com/ziraax/TaxoNet.git
-cd TaxoNet
+git clone https://github.com/ziraax/PlanktonFlow.git
+cd PlanktonFlow-main
 ```
 
 Option 2 : Using the download button
