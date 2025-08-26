@@ -4,7 +4,14 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red)
 ![W&B Integration](https://img.shields.io/badge/Weights_&_Biases-Integrated-yellow)
 
+
+<p align="center">
+  <img src="logo_planktonflow.png" alt="PlanktonFlow Logo" width="300"/>
+</p>
+
 An end-to-end deep learning solution supporting multiple model architectures with advanced features for training, evaluation, and production-ready inference.
+
+See the related paper: [PlanktonFlow: hands-on, deep-learning classification of plankton images for biologists](https://doi.org/fake.doi) (as of 26.08.25, the preprint is not yet published).
 
 
 ## Table of Contents
@@ -34,10 +41,10 @@ An end-to-end deep learning solution supporting multiple model architectures wit
 
 ### Preprocessing
 Tailored for our dataset — customizable for yours.
-- **Multiple Data Input Format**: Wether your dataset is from EcoTaxa, already organised in classical classification form or using a CSV/TSV file, everything is implemented
-- **Data Augmentation**: Allows to augment the training data to limit the class imbalance issue
-- **Scalebar Removal**: Allows to detect and delete scale bars that were originally present in some images using a YOLOv8 model. 
-- **Automatic Data Splitting**: The tool makes preprocessing entirely configurable, with automatic data splitting for training/evaluation and generates automaticly yaml configuration files
+- **Multiple Data Input Formats**: Whether your dataset is from EcoTaxa, already organized in classical classification form, or uses a CSV/TSV file, everything is implemented.
+- **Data Augmentation**: Augments the training data to help address class imbalance.
+- **Scalebar Removal**: Detects and removes scale bars that are present in some images using a YOLOv8 model.
+- **Automatic Data Splitting**: The tool makes preprocessing entirely configurable, with automatic data splitting for training/evaluation and automatically generates YAML configuration files.
 
 
 ### Training
@@ -59,11 +66,11 @@ Tailored for our dataset — customizable for yours.
 
 ## Installation
 
-This installation process covers all steps since this project aims to be used by biologists that could be not familiar with setting up such projects. For more exeperienced users, it follows the general process of setting up a virtual environment, activating it, installing dependencies and running Python scripts. 
+This installation process covers all steps, as this project aims to be used by biologists who may not be familiar with setting up such projects. For more experienced users, it follows the general process of setting up a virtual environment, activating it, installing dependencies, and running Python scripts. 
 
 1. **Install Python**:
 
-This project uses Python to work, and was developped using Python 3.12.3. Please download Python with this link (official) : [Python-3.12.3](https://www.python.org/downloads/release/python-3123/) by clicking on the version corresponding to your operating system. 
+This project uses Python and was developed using Python 3.12.3. Please download Python from the official link: [Python-3.12.3](https://www.python.org/downloads/release/python-3123/) by clicking on the version corresponding to your operating system. 
 
 Make sure to check "Add Python to PATH" during installation. 
 
@@ -78,11 +85,11 @@ cd TaxoNet
 
 Option 2 : Using the download button
 
-If you are not familiar with Git, you can simply click the green "<> Code" button and click on "Download ZIP". Then, simply extract the project where you want it to be on your computer. 
+If you are not familiar with Git, you can simply click the green "<> Code" button and select "Download ZIP". Then, extract the project wherever you want on your computer. 
 
 3. **Create a virtual environment**:
 
-Virtual environments in Python are isolated directories that contain their own Python interpreter and libraries, allowing you to manage dependencies for each project separately. This prevents conflicts between packages required by different projects and ensures reproducible setups. This comes in handy in a project like this one, where there are a lot of dependencies.
+Virtual environments in Python are isolated directories that contain their own Python interpreter and libraries, allowing you to manage dependencies for each project separately. This prevents conflicts between packages required by different projects and ensures reproducible setups. This is especially useful for a project like this, which has many dependencies.
 
 To create a virtual environment, open a terminal in the folder where you downloaded the project and run :
 
@@ -90,34 +97,33 @@ To create a virtual environment, open a terminal in the folder where you downloa
 python3 -m venv .venv
 ```
 
-Where **.venv** will be the name of the folder holding the virtual environment. 
+Here, **.venv** will be the name of the folder holding the virtual environment. 
 
 
 4. **Activate the Environment**:
 
-Now, depending on your Operating System : 
+Now, depending on your operating system:
 
- - On Windows using your Terminal (CMD), type:
+- On Windows using your terminal (CMD), type:
 ```bash
 .venv\Scripts\activate
 ```
 
-- On Windows Powershell : 
+- On Windows Powershell:
 
 ```
 .\.venv\Scripts\Activate.ps1
 ```
 
-- Using bash : 
+- On bash (Linux/macOS):
 
 ```bash
 source .venv/bin/activate
 ```
 
-After activation, your terminal will change to show the venv name. 
+After activation, your terminal will change to show the venv name.
 
-⚠️ In case you run into a bug like "Cannot load the file 
-C:\.\TaxoNet\venv\Scripts\Activate.ps1 because script execution is disabled on this system.", it means that your current script execution policy is blocking scripts by default for security reason. To fix this issue, type in a Powershell terminal: 
+⚠️ If you encounter an error like "Cannot load the file C:\.\TaxoNet\venv\Scripts\Activate.ps1 because script execution is disabled on this system.", it means that your current script execution policy is blocking scripts by default for security reasons. To fix this issue, type in a Powershell terminal:
 
 ```bash
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
@@ -132,31 +138,41 @@ Type in your terminal:
 pip install -r requirements.txt
 ``` 
 
-This installs all the packages listed in the file into the virtual environment. This can take several minutes. 
+This installs all the packages listed in the file into the virtual environment. This may take several minutes. 
 
-You can confirm it worked by typing : 
+You can confirm it worked by typing:
 
 ```bash
 pip list
 ```
 
 6. **(Optional) Log into Weights & Biases**
+
+Weights & Biases provides robust tools for tracking training runs and performing hyperparameter tuning. It is best suited for users with more advanced needs.
+
 ```bash
 wandb login
 ``` 
-Then follow instructions. 
+Then follow the instructions. 
 
 
 ## Usages
 
-This chapter goes through all the different usages that a user may have with the pipeline. The system is designed around YAML configuration files that make it easy to reproduce experiments and manage different setups.
+This chapter goes through all the different ways a user may use the pipeline. The system is designed around YAML configuration files that make it easy to reproduce experiments and manage different setups.
+
+### Dataset used in the study
+
+The pipeline was originally developed for a specific use case at INRAE UMR DECOD (Rennes, France), where it supports ongoing research on monitoring plankton communities, and was later extended and modularized so that it can benefit the scientific community. 
+
+For convenience, we also provide the dataset used in our study. You can download it from [Zenodo - PlanktonFlow76](https://doi.org/10.5281/zenodo.16840846) as a starting point, or substitute your own data.
+
 
 ### To preprocess your data
 
 The preprocessing system supports three different data input formats. Choose the configuration that matches your data organization:
 
 #### 1. Hierarchical Data Format (Folder-based)
-If your data is organized in folders where each folder name represents a class:
+If your data is organized in folders, where each folder name represents a class:
 
 ```bash
 python3 run_preprocessing.py --config configs/preprocessing/PreprocessWithHierarchical.yaml
@@ -237,8 +253,8 @@ input_source:
   image_path_prefix: ""
 
 preprocessing:
-  # Same preprocessing parameters over all configs 
- [...]
+  # Same preprocessing parameters as above
+  [...]
       
 output:
   base_path: "DATA/your_dataset"
@@ -270,7 +286,7 @@ input_source:
   separator: "\t"
 
 preprocessing:
-  # Same preprocessing parameters over all configs 
+  # Same preprocessing parameters as above
   [...]
 
 output:
@@ -288,7 +304,7 @@ logging:
 
 ### To train a model
 
-Training is fully configuration-driven. You can train different model architectures with various hyperparameters:
+Training is fully configuration-driven. You can train different model architectures with various hyperparameters.
 
 ```bash
 python3 run_training.py --config configs/training/TrainDefault{modelName}.yaml
@@ -346,7 +362,7 @@ wandb:
   notes: "Production training run"
 ```
 
-Training will always compute metrics on the test set at the end. 
+Training will always compute metrics on the test set at the end.
 
 #### Advanced Training Features
 
@@ -392,7 +408,7 @@ run_name: "offline_experiment"
 
 ### Inference (Making predictions)
 
-Use trained models to make predictions on new images:
+Use trained models to make predictions on new images.
 
 ```bash
 python3 run_inference.py --config configs/inference/your_inference_config.yaml
@@ -444,6 +460,10 @@ wandb:
 - CSV file with detailed predictions and confidence scores (specified in `output_path`)
 - Predictions include top-K classes with probabilities for each image
 - Optional scalebar preprocessing applied automatically if enabled
+
+
+If your dataset matches ours (see [Zenodo-PlanktonFlow76](https://doi.org/10.5281/zenodo.16840846) and the related paper [PlanktonFlow: hands-on, deep-learning classification of plankton images for biologists](https://doi.org/fake.doi) (as of 26.08.25, the preprint is not yet published)), you may want to use our best performing model. 
+The model parameters can be found in the supplementary archive at [PlanktonFlow: Supplementary Information](https://doi.org/10.5281/zenodo.16902839). You will need to place the best model parameters in the correct folder, namely, ```model_weights/efficientnet/b5/{name}/```, and modify the inference configuration file accordingly. The model is trained on 76 classes; the class names can be found in: ```DATA/final_dataset/dataset.yaml```. 
 
 ### Hyperparameter Optimization
 
@@ -498,7 +518,7 @@ parameters:
 2. Each run tests different hyperparameter combinations
 3. Results are logged to Weights & Biases for comparison
 4. Best configurations are automatically identified
-5. When you are satisfied with the results, you can just stop the sweep in the terminal
+5. When you are satisfied with the results, you can stop the sweep in the terminal.
 
 ### Quick Start Examples
 
@@ -513,6 +533,11 @@ python3 run_training.py --config configs/training/TrainDefaultEfficientNet.yaml
 # 3. Make predictions
 python3 run_inference.py --config configs/inference/DefaultInference.yaml
 ```
+
+### Reproducing Results
+
+To facilitate reproducibility, we provide configuration files for all models and their corresponding hyperparameters in the ```configs/reproduce_paper``` directory. Using these training configurations together with the preprocessed dataset available at [Zenodo-PlanktonFlow76](https://doi.org/10.5281/zenodo.16840846) should enable you to reliably reproduce the results presented in the paper.
+
 
 ## Results and monitoring
 
@@ -579,12 +604,14 @@ If you’d like to help improve this project, please check out our [CONTRIBUTING
 If you use this project in your research, please cite it as:
 
 ```bibtex
-@software{walter2025pipeline,
-  author = {Hugo WALTER},
-  title = {Deep Learning Classification Pipeline for Automatic Plankton Classification},
-  year = {2025},
-  publisher = {GitHub},
-  url = {https://github.com/ziraax/TaxoNet}
+@software{walter2025planktonflow,
+  author = {Walter, Hugo},
+  title        = {PlanktonFlow - Deep Learning Classification Pipeline for Automatic Plankton Classification},
+  version      = {1.0.0},
+  date         = {2025-08-01},
+  publisher    = {GitHub},
+  url          = {https://github.com/ziraax/PlanktonFlow},
+  license      = {MIT}
 }
 ```
 
