@@ -620,8 +620,9 @@ If you use this project in your research, please cite it as:
 This project is open source and distributed under the [MIT License](./LICENSE.md).  
 See the `LICENSE.md` file for details.
 
+---
 
-
+Thanks for checking out this project! I hope it’s useful for the scientific community.  A special shout-out to the INRAE team (Rennes, France), this internship was intense but incredibly rewarding, and I learned a ton while developing this tool! 🌱
 
 
 
