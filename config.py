@@ -1,15 +1,15 @@
 import torch
 from pathlib import Path
 
-# Default paths - can be overridden by YAML configs
-RAW_DATA_ROOT = Path("DATA/DATA_500_INDIV")
+# Default paths - will be overridden by YAML configs and serve as a fallback
+RAW_DATA_ROOT = Path("DATA/raw_dataset")
 PROCESSED_PATH = Path("DATA/processed_dataset")
 FINAL_DATASET_PATH = Path("DATA/final_dataset")
 
 # Minimal default configuration - most settings now come from YAML files
 DEFAULT_CONFIG = {
     # Basic project info
-    "project_name": "YOLOv11Classification500",
+    "project_name": "YourWandBProjectName",
     
     # Default paths (overridden by YAML configs)
     "raw_data_root": str(RAW_DATA_ROOT),
