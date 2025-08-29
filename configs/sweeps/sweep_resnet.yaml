@@ -35,6 +35,9 @@ parameters:
   epochs:
     value: 30
 
+  batch_size:
+    value: 64
+
   optimizer:
     values: ["adamw", "adam"]
 

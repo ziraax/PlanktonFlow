@@ -66,7 +66,7 @@ parameters:
                                 # Enough to see clear results without taking too long
   
   batch_size:
-    values: 64                  # 🔢 Fixed batch size
+    value: 64                  # 🔢 Fixed batch size
                                 # You can add more values like [32, 64, 128] to test different sizes
   
   optimizer:
