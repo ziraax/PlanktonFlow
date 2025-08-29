@@ -11,7 +11,7 @@
 model:
   name: "densenet"              # Type of model architecture
   variant: "161"                # Model size/variant
-  weights_path: "model_weights/densenet/161/DenseNet_Default_Config_Run_CARO_20250818_144738/best.pt"
+  weights_path: "model_weights/densenet/161/DenseNet_Default_Config_Run_CARO_20250829_140917/best.pt"
   num_classes: 5                # Number of classes the model was trained on
 
 # 📄 DATASET YAML (for class names)

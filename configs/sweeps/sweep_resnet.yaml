@@ -6,6 +6,9 @@ metric:
   name: val/metrics/f1_macro
 
 parameters:
+  # DATASET LOCATION (override this to point to your own data folder)
+  final_dataset_path:
+    value: "DATA/final_dataset"
   # Model related parameters
   model_name:
     values: ["resnet"]

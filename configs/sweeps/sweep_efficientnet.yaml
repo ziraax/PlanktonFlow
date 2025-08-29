@@ -22,6 +22,9 @@ metric:
 
 # 🔧 PARAMETERS TO OPTIMIZE
 parameters:
+  # DATASET LOCATION (override this to point to your own data folder)
+  final_dataset_path:
+    value: "DATA/sample_hierarchical_final_dataset"
   
   # 🤖 MODEL ARCHITECTURE SETTINGS
   model_name:
